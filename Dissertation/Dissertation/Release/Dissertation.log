@@ -1,0 +1,19 @@
+﻿Build started 15/09/2015 16:58:30.
+     1>Project "G:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         E:\Programs\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\glm /I"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\include" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D GLEW_STATIC /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Application.cpp
+         Application.cpp
+       Link:
+         E:\Programs\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe" /NOLOGO /LIBPATH:"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\lib\x86" SDL2.lib SDL2main.lib OpenGL32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Release\Dissertation.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.lib" /MACHINE:X86 Release\Application.obj
+         Release\glew.obj
+         Release\Main.obj
+         Generating code
+         Finished generating code
+         Dissertation.vcxproj -> G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe;#1" /manifest Release\Dissertation.exe.intermediate.manifest
+     1>Done Building Project "G:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:01.74

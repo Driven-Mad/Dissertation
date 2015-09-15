@@ -1,0 +1,11 @@
+﻿Build started 15/09/2015 12:55:41.
+     1>Project "G:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" on node 2 (Build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V110\Microsoft.CppBuild.targets(344,5): warning MSB8003: Could not find WindowsSDKDir variable from the registry.  TargetFrameworkVersion or PlatformToolset may be set to an invalid version number.
+     1>ClCompile:
+         E:\Programs\VC\bin\CL.exe /c /I..\glm /I"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\include" /ZI /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D GLEW_STATIC /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt glew.cpp Main.cpp
+     1>cl : Command line error D8016: '/ZI' and '/O2' command-line options are incompatible
+     1>Done Building Project "G:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:00.10
