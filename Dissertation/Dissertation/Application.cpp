@@ -7,9 +7,9 @@ Application::Application(void)
 	winPosY = 100;
 	winWidth = 1280;
 	winHeight = 960;
-	camera_Zoom = -2.5f;
-	camera_Left_Right = 0.0f;
-	camera_Up_Down = 0.0f;
+	camera_Zoom = -15.0f;
+	camera_Left_Right = -4.5f;
+	camera_Up_Down = -3.0f;
 	lastTime = SDL_GetTicks();
 }
 
@@ -55,6 +55,12 @@ void Application::init(){
 		return;
 	}
 	glEnable(GL_DEPTH_TEST);
+
+	skyDome = new Model("assets/dome.obj","shaders/domeFragmentShader.txt","shaders/domeVertexShader.txt");
+	textLoad = new TextureLoader();
+	textLoad->loadTexture("assets/sky.bmp",skyDome->getProgram());
+	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
+	fBuffer->init();
 }
 void Application::run(float DT){
 	current = SDL_GetTicks();
@@ -67,11 +73,35 @@ void Application::run(float DT){
 	draw();
 }
 void Application::draw(){
+	fBuffer->bind(winWidth,winHeight);
+		//bind here
+			textLoad->enableTextures();
+			skyDome->draw(viewMatrix, projectionMatrix);
+	//unbind here
+	fBuffer->unbind(winWidth,winHeight);
+	//draw here
+	fBuffer->draw(0);
+	// cleanup here
+	fBuffer->cleanUp();
 	SDL_GL_SwapWindow( window );
 }
 void Application::update(float DT){
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	skyDome->update(DT);
+
+	//////! ROTATING SKY DOME !/////////
+	// update the rotation angle
+	float rotation = skyDome->getRotation().y + DT * 0.1;
+	skyDome->setRotation(glm::vec3(skyDome->getRotation().x, rotation ,skyDome->getRotation().z));
+	while( rotation > (3.14159265358979323846 * 2.0) ){
+		rotation -= (3.14159265358979323846 * 2.0);
+	}
+	//translate based on identity matrix, and position.
+	skyDome->setModelMatrix(glm::translate(glm::mat4(1.0f), skyDome->getPosition()));
+	// Next, we rotate this matrix in the y-axis by rotation:
+	skyDome->setModelMatrix(glm::rotate(skyDome->getModelMatrix(), rotation, glm::vec3(0,1,0) ));
+	//////! END ROTATING SKY DOME !/////////
 
 	projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
@@ -86,16 +116,16 @@ void Application::inputHandler(){
 			case SDL_KEYDOWN:
 				switch( incomingEvent.key.keysym.sym ){
 					case SDLK_DOWN:
-						camera_Up_Down += 0.1f;
+						camera_Up_Down += 1.0f;
 						break;
 					case SDLK_UP:
-						camera_Up_Down -= 0.1f;
+						camera_Up_Down -= 1.0f;
 						break;
 					case SDLK_LEFT:
-						camera_Left_Right += 0.1f;
+						camera_Left_Right += 1.0f;
 						break;
 					case SDLK_RIGHT:
-						camera_Left_Right -= 0.1f;
+						camera_Left_Right -= 1.0f;
 						break;
 				}
 				break;
@@ -104,10 +134,10 @@ void Application::inputHandler(){
 				break;
 			case SDL_MOUSEWHEEL:
 				if(incomingEvent.wheel.y > 0){
-					camera_Zoom += 0.1f;
+					camera_Zoom += 1.0f;
 				}
 				if(incomingEvent.wheel.y < 0){
-					camera_Zoom -= 0.1f;
+					camera_Zoom -= 1.0f;
 				}
 			}
 		}

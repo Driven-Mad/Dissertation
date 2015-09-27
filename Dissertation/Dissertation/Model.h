@@ -39,6 +39,9 @@ public:
 	glm::vec3 getRotation();
 	/// \brief gets program used.
 	GLint getProgram();
+
+	glm::mat4 getModelMatrix();
+	void setModelMatrix(glm::mat4 a);
 private:
 	glm::vec3 position; ///< Position of model
 	glm::vec3 rotation; ///< Rotation of model

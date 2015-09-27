@@ -146,3 +146,10 @@ glm::vec3 Model::getRotation(){
 GLint Model::getProgram(){
 		return program;
 }
+
+glm::mat4 Model::getModelMatrix(){
+	return modelMatrix;
+}
+void Model::setModelMatrix(glm::mat4 a){
+	modelMatrix = a;
+}

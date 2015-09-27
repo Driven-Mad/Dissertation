@@ -10,6 +10,9 @@
 #include <iostream>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+#include "Model.h"
+#include "TextureLoader.h"
+#include "FrameBuffer.h"
 
 class Application
 {
@@ -50,5 +53,10 @@ private:
 	float camera_Zoom, camera_Left_Right, camera_Up_Down; ///< Camera attributes
 	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
 	float delta_Time; ///< Deltat time for frame rate.
+	Model *skyDome;
+	TextureLoader *textLoad;
+	FrameBuffer *fBuffer;
+
+
 };
 #endif; //!APPLICATION_H
