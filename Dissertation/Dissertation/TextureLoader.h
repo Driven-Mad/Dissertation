@@ -13,7 +13,9 @@
 #include <SDL.h>
 #include "glew.h"
 #include <SDL_image.h>
-
+#include <string>
+#include <stdlib.h>
+#include <sstream>
 
 class TextureLoader
 {
