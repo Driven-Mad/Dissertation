@@ -1,5 +1,10 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
+//------------------------------------------------------------------
+/// \file    ProgramLoader.h
+/// \author  Lloyd Phillips
+/// \brief   This is the Application loader class
+//------------------------------------------------------------------
 #include <SDL.h>
 #include "glew.h"
 #include <iostream>
@@ -9,28 +14,41 @@
 class Application
 {
 public:
+	/// \brief constructor for the application class.
 	Application(void);
+	/// \brief deconstructor for the application class.
 	~Application(void);
+	/// \brief check if Glew has been initialised.
 	bool InitGL();
+	/// \brief initalises the application
 	void init();
+	/// \brief runs the application, uses Delta Time
 	void run(float DT);
+	/// \brief draws the application to screen
 	void draw();
+	/// \brief updates application based on Delta Time
 	void update(float DT);
+	/// \brief input handler for the application
 	void inputHandler();
+	/// \brief returns delta time of application
 	float getDeltaTime();
+	/// \brief returns screen width of application
+	int getWidth();
+	/// \brief returns screen height of application
+	int getHeight();
 
 private:
-	int mouse_X, mouse_Y;
-	SDL_Window *window;
-	SDL_Renderer *renderer;
-	SDL_GLContext glContext;
-	unsigned int lastTime, current;
-	int winPosX;
-	int winPosY;
-	int winWidth;
-	int winHeight;
-	float camera_Zoom, camera_Left_Right, camera_Up_Down;
-	glm::mat4 projectionMatrix, viewMatrix;
-	float delta_Time;
+	int mouse_X, mouse_Y; ///<Mouse Co-ordinates
+	SDL_Window *window; ///< Window for SDL
+	SDL_Renderer *renderer; ///< Renderer for SDL
+	SDL_GLContext glContext; ///< GL context for window
+	unsigned int lastTime, current; ///< seed for delta time
+	int winPosX; ///<window X position
+	int winPosY; ///< window Y poisition
+	int winWidth; ///< window width
+	int winHeight; ///< window Height
+	float camera_Zoom, camera_Left_Right, camera_Up_Down; ///< Camera attributes
+	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
+	float delta_Time; ///< Deltat time for frame rate.
 };
-#endif;
+#endif; //!APPLICATION_H

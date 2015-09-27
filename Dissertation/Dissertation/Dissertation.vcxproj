@@ -156,13 +156,23 @@
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glew.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ObjectLoader.cpp" />
+    <ClCompile Include="Partical_System.cpp" />
     <ClCompile Include="ProgramLoader.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
+    <ClCompile Include="Utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="glew.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ObjectLoader.h" />
+    <ClInclude Include="Partical_System.h" />
     <ClInclude Include="ProgramLoader.h" />
+    <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="Utilities.h" />
     <ClInclude Include="wglew.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

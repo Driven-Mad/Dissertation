@@ -1,8 +1,7 @@
 #include "FrameBuffer.h"
 
 
-FrameBuffer::FrameBuffer(char *fragmentShaderFilepath,char *vertexShaderFilepath)
-{
+FrameBuffer::FrameBuffer(char *fragmentShaderFilepath,char *vertexShaderFilepath){
 	FBuffer = 0;
 	rendTexture = 0;
 	quad_vertexbuffer = 0;
@@ -13,12 +12,10 @@ FrameBuffer::FrameBuffer(char *fragmentShaderFilepath,char *vertexShaderFilepath
 }
 
 
-FrameBuffer::~FrameBuffer(void)
-{
+FrameBuffer::~FrameBuffer(void){
 }
 
 void FrameBuffer::init(){
-	
 	PL->loadProgram(vertFP, fragFP);
 	glGenFramebuffers(1, &FBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBuffer);
@@ -65,8 +62,6 @@ void FrameBuffer::init(){
 	glBindVertexArray(0);
 
 	outputLocation = glGetUniformLocation(quad_programID, "output");
-
-
 }
 
 void FrameBuffer::draw(int output){
@@ -79,25 +74,24 @@ void FrameBuffer::draw(int output){
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, rendTexture);
 	glUniform1i(glGetUniformLocation(quad_programID, "input_texture"), 0);
-	// 'Draw'
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glUniform1i(outputLocation,outPut);
 }
 
-void FrameBuffer::bind(){
+void FrameBuffer::bind( int winWidth,int winHeight){
 	glEnable(GL_DEPTH_TEST);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBuffer);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, 640, 480);
+	glViewport(0, 0, winWidth, winHeight);
 
 }
-void FrameBuffer::unbind(){
+void FrameBuffer::unbind( int winWidth,int winHeight){
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0,0,640,480);
+	glViewport(0,0,winWidth,winHeight);
 }
 
 void FrameBuffer::cleanUp(){

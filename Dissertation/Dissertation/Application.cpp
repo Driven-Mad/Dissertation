@@ -115,3 +115,9 @@ void Application::inputHandler(){
 float Application::getDeltaTime(){
 	return delta_Time;
 }
+int Application::getWidth(){
+	return winWidth;
+}
+int Application::getHeight(){
+	return winHeight;
+}

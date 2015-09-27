@@ -4,6 +4,8 @@
 /// \file    ProgramLoader.h
 /// \author  Lloyd Phillips
 /// \brief   This is the program loader class
+///          THIS CLASS WAS CREATED IN ASSIGNMENT 2 OF PROGRAMMING FOR GRAPHICS AND GAMES. 
+///          SLIGHTLY MODIFIED FOR IMPOROVED FUNCTIONALITY.
 //------------------------------------------------------------------
 #include <string>
 #include <sstream>

@@ -1,29 +1,43 @@
-#pragma once
+#ifndef FRAMEBUFFER_H
+#define FRAMEBUFFER_H
+
+//------------------------------------------------------------------
+/// \file    FrameBuffer.h
+/// \author  Lloyd Phillips
+/// \brief   This is the frameBuffer loader class
+//------------------------------------------------------------------
 #include "glew.h"
 #include "ProgramLoader.h"
 class FrameBuffer
 {
 public:
+	/// \brief constructor for frameBuffer, takes in shader file paths.
 	FrameBuffer(char *fragmentShaderFilepath,char *vertexShaderFilepath);
+	/// \brief deconstructor for frameBuffer.
 	~FrameBuffer(void);
+	/// \brief initialises the framebuffer.
 	void init();
+	/// \brief draws framebuffer, output will be a selection from the user.
 	void draw(int output);
-	void bind();
-	void unbind();
+	/// \brief binds the framebuffer. takes in windowWidth, winowHeight.
+	void bind( int winWidth,int winHeight);
+	/// \brief unbinds the framebuffer. takes in windowWidth, winowHeight.
+	void unbind( int winWidth,int winHeight);
+	/// \brief cleans up after itself. returning openGL to it's original state.
 	void cleanUp();
 private:
-	GLuint FBuffer;
-	ProgramLoader *PL;
-	GLuint rendTexture;
-	GLuint depthRenderBuffer;
-	GLenum DrawBuffers[1];
-	GLuint quad_VertexArrayID;
-	GLuint quad_vertexbuffer;
-	GLuint quad_programID;
-	GLint quad_attrib;
-	char *fragFP, *vertFP;
-	GLint outputLocation;
-	int outPut;
+	GLuint FBuffer; ///< Storage for the framebuffer.
+	ProgramLoader *PL; ///< Program that it's going to use.
+	GLuint rendTexture; ///< rendered texture output.
+	GLuint depthRenderBuffer; ///< Depth buffer
+	GLenum DrawBuffers[1]; ///< Draw buffer
+	GLuint quad_VertexArrayID; ///< quad vertexarray ID
+	GLuint quad_vertexbuffer; ///< quad vertex buffer
+	GLuint quad_programID; ///< quad program ID
+	GLint quad_attrib;///< quad Attribute
+	char *fragFP, *vertFP; ///< File path for Shaders
+	GLint outputLocation; ///< output location for uniform of user input.
+	int outPut; ///< output from user.
 
 };
-
+#endif //!FRAMEBUFFER_H
