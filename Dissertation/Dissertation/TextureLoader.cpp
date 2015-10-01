@@ -24,12 +24,11 @@ GLuint TextureLoader::loadTEXT(char * filepath){
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img->w, img->h,0, GL_BGR, GL_UNSIGNED_BYTE,img->pixels);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	//confirmation
 	printf("\n Texture %s has been loaded into slot NUM: %i",filepath, textures.size() );
@@ -49,6 +48,7 @@ void TextureLoader::loadTexture(char *fileName, GLint Program){
 	glActiveTexture(GL_TEXTURE0 +size);
 	loadTEXT(fileName);
 	glEnable(GL_TEXTURE_2D);
+
 	//Get location.
 	std::string s1 = "textSampler";
 	std::string s3 = s1 + s2;

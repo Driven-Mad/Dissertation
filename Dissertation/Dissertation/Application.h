@@ -50,11 +50,11 @@ private:
 	int winPosY; ///< window Y poisition
 	int winWidth; ///< window width
 	int winHeight; ///< window Height
-	float camera_Zoom, camera_Left_Right, camera_Up_Down; ///< Camera attributes
+	float camera_Zoom, camera_Left_Right, camera_Up_Down, camera_rotate; ///< Camera attributes
 	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
 	float delta_Time; ///< Deltat time for frame rate.
-	Model *skyDome;
-	TextureLoader *textLoad;
+	Model *skyDome, *house, *plane, *shelter,*car;
+	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5;
 	FrameBuffer *fBuffer;
 
 

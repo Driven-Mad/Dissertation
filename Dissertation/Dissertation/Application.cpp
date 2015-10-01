@@ -11,6 +11,7 @@ Application::Application(void)
 	camera_Left_Right = -4.5f;
 	camera_Up_Down = -3.0f;
 	lastTime = SDL_GetTicks();
+	camera_rotate = 0.0f;
 }
 
 
@@ -57,8 +58,25 @@ void Application::init(){
 	glEnable(GL_DEPTH_TEST);
 
 	skyDome = new Model("assets/dome.obj","shaders/domeFragmentShader.txt","shaders/domeVertexShader.txt");
+	house = new Model("assets/houseA_obj.obj","shaders/houseFragmentShader.txt","shaders/houseVertexShader.txt");
+	plane = new Model("assets/plane.obj","shaders/planeFragmentShader.txt","shaders/planeVertexShader.txt");
+	shelter = new Model("assets/Old_Shelter.obj","shaders/houseFragmentShader.txt","shaders/houseVertexShader.txt");
+	car = new Model("assets/pickup_truck.obj","shaders/carFragmentShader.txt","shaders/carVertexShader.txt");
 	textLoad = new TextureLoader();
-	textLoad->loadTexture("assets/sky.bmp",skyDome->getProgram());
+	textLoad2 = new TextureLoader();
+	textLoad3 = new TextureLoader();
+	textLoad4 = new TextureLoader();
+	textLoad5 = new TextureLoader();
+	textLoad->loadTexture("assets/Sky.bmp",skyDome->getProgram());
+	textLoad->loadTexture("assets/SkyNormal.bmp",skyDome->getProgram());
+	textLoad2->loadTexture("assets/houseA.bmp",house->getProgram());
+	textLoad2->loadTexture("assets/houseANormal.bmp",house->getProgram());
+	textLoad3->loadTexture("assets/grass.bmp",plane->getProgram());
+	textLoad3->loadTexture("assets/grassNormal.bmp",plane->getProgram());
+	textLoad5->loadTexture("assets/Curve.bmp", shelter->getProgram());
+	textLoad5->loadTexture("assets/Metal line bump.bmp",shelter->getProgram());
+	textLoad4->loadTexture("assets/pickup_blue.bmp",car->getProgram());
+	textLoad4->loadTexture("assets/pickup_blue_n.bmp",car->getProgram());
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
 	fBuffer->init();
 }
@@ -74,9 +92,19 @@ void Application::run(float DT){
 }
 void Application::draw(){
 	fBuffer->bind(winWidth,winHeight);
-		//bind here
+			//bind here
+			textLoad4->enableTextures();
+			car->draw(viewMatrix, projectionMatrix);
+			textLoad2->enableTextures();
+			house->draw(viewMatrix,projectionMatrix);
 			textLoad->enableTextures();
 			skyDome->draw(viewMatrix, projectionMatrix);
+			textLoad3->enableTextures();
+			plane->draw(viewMatrix,projectionMatrix);
+			textLoad5->enableTextures();
+			shelter->draw(viewMatrix,projectionMatrix);
+			
+			
 	//unbind here
 	fBuffer->unbind(winWidth,winHeight);
 	//draw here
@@ -89,10 +117,13 @@ void Application::update(float DT){
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	skyDome->update(DT);
-
+	house->update(DT);
+	plane->update(DT);
+	shelter->update(DT);
+	car->update(DT);
 	//////! ROTATING SKY DOME !/////////
 	// update the rotation angle
-	float rotation = skyDome->getRotation().y + DT * 0.1;
+	float rotation = skyDome->getRotation().y + DT * 0.01;
 	skyDome->setRotation(glm::vec3(skyDome->getRotation().x, rotation ,skyDome->getRotation().z));
 	while( rotation > (3.14159265358979323846 * 2.0) ){
 		rotation -= (3.14159265358979323846 * 2.0);
@@ -105,6 +136,7 @@ void Application::update(float DT){
 
 	projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
+	viewMatrix = glm::rotate(viewMatrix, camera_rotate, glm::vec3(0,1,0));
 }
 void Application::inputHandler(){
 	SDL_Event incomingEvent;
@@ -116,16 +148,34 @@ void Application::inputHandler(){
 			case SDL_KEYDOWN:
 				switch( incomingEvent.key.keysym.sym ){
 					case SDLK_DOWN:
-						camera_Up_Down += 1.0f;
+						
 						break;
 					case SDLK_UP:
-						camera_Up_Down -= 1.0f;
+						
 						break;
 					case SDLK_LEFT:
-						camera_Left_Right += 1.0f;
+						
 						break;
 					case SDLK_RIGHT:
-						camera_Left_Right -= 1.0f;
+						
+						break;
+					case SDLK_q:
+						camera_rotate += 0.5f;
+						break;
+					case SDLK_e:
+						camera_rotate -= 0.5f;
+						break;
+					case SDLK_w:
+						camera_Up_Down -= 0.5f;
+						break;
+					case SDLK_a:
+						camera_Left_Right += 0.5f;
+						break;
+					case SDLK_s:
+						camera_Up_Down += 0.5f;
+						break;
+					case SDLK_d:
+						camera_Left_Right -= 0.5f;
 						break;
 				}
 				break;
@@ -134,10 +184,10 @@ void Application::inputHandler(){
 				break;
 			case SDL_MOUSEWHEEL:
 				if(incomingEvent.wheel.y > 0){
-					camera_Zoom += 1.0f;
+					camera_Zoom += 0.5f;
 				}
 				if(incomingEvent.wheel.y < 0){
-					camera_Zoom -= 1.0f;
+					camera_Zoom -= 0.5f;
 				}
 			}
 		}
