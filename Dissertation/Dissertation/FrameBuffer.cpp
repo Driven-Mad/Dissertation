@@ -15,7 +15,7 @@ FrameBuffer::FrameBuffer(char *fragmentShaderFilepath,char *vertexShaderFilepath
 FrameBuffer::~FrameBuffer(void){
 }
 
-void FrameBuffer::init(){
+void FrameBuffer::init(int winWidth,int winHeight){
 	PL->loadProgram(vertFP, fragFP);
 	glGenFramebuffers(1, &FBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBuffer);
@@ -23,13 +23,13 @@ void FrameBuffer::init(){
 	
 	glGenTextures(1, &rendTexture);
 	glBindTexture(GL_TEXTURE_2D, rendTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 640, 480,0, GL_RGBA, GL_UNSIGNED_BYTE,NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, winWidth, winHeight,0, GL_RGBA, GL_UNSIGNED_BYTE,NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glGenRenderbuffers(1, &depthRenderBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 640, 480);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, winWidth, winHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
 	glFramebufferTexture(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,rendTexture,0);

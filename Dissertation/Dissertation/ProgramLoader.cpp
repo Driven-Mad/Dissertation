@@ -17,7 +17,7 @@ void ProgramLoader::loadVShader(char *filepath){
 	if(Vdata.size() == NULL){
 		std::ofstream newFile;
 		newFile.open(filepath);
-		newFile <<"#version 330 \n \n layout(location = 0) in vec2 vs_position; \n \n out vec2 UV; \n \n void main() \n {\n UV = (vs_position + 1.0) / 2.0;\n gl_Position = vec4(vs_position, 0.0, 1.0); \n }";
+		newFile <<"#version 330\n }";
 		newFile.close();
 		printf("\n NEW FILE WAS CREATED: %s", filepath);
 	}
@@ -54,7 +54,7 @@ void ProgramLoader::loadFShader(char *filepath){
 	if(Fdata.size() == NULL){
 		std::ofstream newFile;
 		newFile.open(filepath);
-		newFile <<"#version 330 \n \n in vec2 UV; \n \n uniform sampler2D input_texture; \n \n void main() \n {\n gl_FragColor = texture(input_texture, UV);\n }";
+		newFile <<"#version 330\n }";
 		newFile.close();
 		printf("\n NEW FILE WAS CREATED: %s", filepath);
 	}

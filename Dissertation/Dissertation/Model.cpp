@@ -16,6 +16,7 @@ Model::Model(char *objectFP, char *fragShaderFP, char *vertShaderFP){
 	// Create the shaders
 	initaliseShaders();
 	modelMatrix = glm::translate(glm::mat4(1.0f), position );
+	lightPos = glm::vec4(1.0f,1.0f,0.2f,1.0f);
 }
 
 
@@ -96,10 +97,12 @@ void Model::initaliseShaders(){
 	shaderViewMatLocation = glGetUniformLocation( program, "viewMat" );
 	shaderProjMatLocation = glGetUniformLocation( program, "projMat" );
 	shader3X3Location = glGetUniformLocation(program, "MV3x3");
+	lightPositionLocation = glGetUniformLocation(program,"lightPosition");
 }
 
-void Model::update(float DT){
+void Model::update(float DT, glm::vec4 lightPosition){
 	modelMatrix = glm::translate(glm::mat4(1.0f), position );
+	lightPos = lightPosition;
 }
 
 void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
@@ -117,6 +120,8 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 			glUniformMatrix4fv(shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix) );
 			glUniformMatrix4fv(shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(projMatrix) );
 			glUniformMatrix3fv(shader3X3Location, 1, GL_FALSE, glm::value_ptr(modelViewMatrix3x3));
+			glUniform4fv(lightPositionLocation,1,glm::value_ptr(lightPos));
+			
 
 			// Tell OpenGL to draw it
 			// Must specify the type of geometry to draw and the number of vertices
@@ -152,4 +157,26 @@ glm::mat4 Model::getModelMatrix(){
 }
 void Model::setModelMatrix(glm::mat4 a){
 	modelMatrix = a;
+}
+
+void Model::rotateY(float speed, float DT){
+	// update the rotation angle
+	rotation.y += DT * speed;
+	while( rotation.y > (3.14159265358979323846 * 2.0) ){
+		rotation.y -= (3.14159265358979323846 * 2.0);
+	}
+	//translate based on identity matrix, and position.
+	setModelMatrix(glm::translate(glm::mat4(1.0f), position));
+	// Next, we rotate this matrix in the y-axis by rotation:
+	setModelMatrix(glm::rotate(modelMatrix, rotation.y, glm::vec3(0,1,0) ));
+
+}
+
+/// \brief sets Light position
+void Model::setLightPosition(glm::vec4 a){
+	lightPos = a;
+}
+/// \brief gets Light position
+glm::vec4 Model::getLightPosition(){
+	return lightPos;
 }

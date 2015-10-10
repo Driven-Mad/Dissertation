@@ -12,6 +12,8 @@ Application::Application(void)
 	camera_Up_Down = -3.0f;
 	lastTime = SDL_GetTicks();
 	camera_rotate = 0.0f;
+	lightPosition = glm::vec4(1.0f,1.0f,0.2f,1.0f);
+	leftShiftPressed = leftAltPressed = false;
 }
 
 
@@ -62,6 +64,7 @@ void Application::init(){
 	plane = new Model("assets/plane.obj","shaders/planeFragmentShader.txt","shaders/planeVertexShader.txt");
 	shelter = new Model("assets/Old_Shelter.obj","shaders/houseFragmentShader.txt","shaders/houseVertexShader.txt");
 	car = new Model("assets/pickup_truck.obj","shaders/carFragmentShader.txt","shaders/carVertexShader.txt");
+	light = new Model("assets/light.obj","shaders/lightFragmentShader.txt","shaders/lightVertexShader.txt");
 	textLoad = new TextureLoader();
 	textLoad2 = new TextureLoader();
 	textLoad3 = new TextureLoader();
@@ -78,7 +81,7 @@ void Application::init(){
 	textLoad4->loadTexture("assets/pickup_blue.bmp",car->getProgram());
 	textLoad4->loadTexture("assets/pickup_blue_n.bmp",car->getProgram());
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
-	fBuffer->init();
+	fBuffer->init(winWidth,winHeight);
 }
 void Application::run(float DT){
 	current = SDL_GetTicks();
@@ -103,6 +106,7 @@ void Application::draw(){
 			plane->draw(viewMatrix,projectionMatrix);
 			textLoad5->enableTextures();
 			shelter->draw(viewMatrix,projectionMatrix);
+			light->draw(viewMatrix,projectionMatrix);
 			
 			
 	//unbind here
@@ -114,26 +118,17 @@ void Application::draw(){
 	SDL_GL_SwapWindow( window );
 }
 void Application::update(float DT){
+	light->setLightPosition(lightPosition);
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	skyDome->update(DT);
-	house->update(DT);
-	plane->update(DT);
-	shelter->update(DT);
-	car->update(DT);
-	//////! ROTATING SKY DOME !/////////
-	// update the rotation angle
-	float rotation = skyDome->getRotation().y + DT * 0.01;
-	skyDome->setRotation(glm::vec3(skyDome->getRotation().x, rotation ,skyDome->getRotation().z));
-	while( rotation > (3.14159265358979323846 * 2.0) ){
-		rotation -= (3.14159265358979323846 * 2.0);
-	}
-	//translate based on identity matrix, and position.
-	skyDome->setModelMatrix(glm::translate(glm::mat4(1.0f), skyDome->getPosition()));
-	// Next, we rotate this matrix in the y-axis by rotation:
-	skyDome->setModelMatrix(glm::rotate(skyDome->getModelMatrix(), rotation, glm::vec3(0,1,0) ));
-	//////! END ROTATING SKY DOME !/////////
-
+	skyDome->update(DT,light->getLightPosition());
+	house->update(DT,light->getLightPosition());
+	plane->update(DT,light->getLightPosition());
+	shelter->update(DT,light->getLightPosition());
+	car->update(DT,light->getLightPosition());
+	skyDome->rotateY(0.01,DT);
+	light->update(DT,light->getLightPosition());
+	light->setPosition(glm::vec3(lightPosition.x,lightPosition.y,lightPosition.z));
 	projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
 	viewMatrix = glm::rotate(viewMatrix, camera_rotate, glm::vec3(0,1,0));
@@ -147,35 +142,69 @@ void Application::inputHandler(){
 				break;
 			case SDL_KEYDOWN:
 				switch( incomingEvent.key.keysym.sym ){
-					case SDLK_DOWN:
-						
-						break;
-					case SDLK_UP:
-						
-						break;
-					case SDLK_LEFT:
-						
-						break;
-					case SDLK_RIGHT:
-						
-						break;
 					case SDLK_q:
-						camera_rotate += 0.5f;
+						if(leftAltPressed){
+							camera_rotate += 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.z += 0.1f;
+						}
 						break;
 					case SDLK_e:
-						camera_rotate -= 0.5f;
+						if(leftAltPressed){
+							camera_rotate -= 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.z -= 0.1f;
+						}
 						break;
 					case SDLK_w:
-						camera_Up_Down -= 0.5f;
+						if(leftAltPressed){
+							camera_Up_Down -= 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.y += 0.1f;
+						}
 						break;
 					case SDLK_a:
-						camera_Left_Right += 0.5f;
+						if(leftAltPressed){
+							camera_Left_Right += 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.x -= 0.1f;
+						}
 						break;
 					case SDLK_s:
-						camera_Up_Down += 0.5f;
+						if(leftAltPressed){
+							camera_Up_Down += 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.y -= 0.1f;
+						}
 						break;
 					case SDLK_d:
-						camera_Left_Right -= 0.5f;
+						if(leftAltPressed){
+							camera_Left_Right -= 0.1f;
+						}
+						if(leftShiftPressed){
+							lightPosition.x += 0.1f;
+						}
+						break;
+					case SDLK_LSHIFT:
+						leftShiftPressed = true;
+						break;
+					case SDLK_LALT:
+						leftAltPressed = true;
+						break;
+				}
+				break;
+			case SDL_KEYUP:
+				switch(incomingEvent.key.keysym.sym){
+					case SDLK_LSHIFT:
+						leftShiftPressed = false;
+						break;
+					case SDLK_LALT:
+						leftAltPressed = false;
 						break;
 				}
 				break;

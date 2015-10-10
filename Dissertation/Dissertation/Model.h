@@ -26,7 +26,7 @@ public:
 	/// \brief intialises shaders
 	void initaliseShaders();
 	/// \brief updates the model
-	void update(float DT);
+	void update(float DT, glm::vec4 lightPosition);
 	/// \brief draws model given camera view and projection matrix
 	void draw(glm::mat4 viewMatrix, glm::mat4 projMatrix);
 	/// \brief sets position
@@ -40,6 +40,13 @@ public:
 	/// \brief gets program used.
 	GLint getProgram();
 
+	/// \brief sets Light position
+	void setLightPosition(glm::vec4 a);
+	/// \brief gets Light position
+	glm::vec4 getLightPosition();
+
+	void rotateY(float speed, float DT);
+
 	glm::mat4 getModelMatrix();
 	void setModelMatrix(glm::mat4 a);
 private:
@@ -47,7 +54,7 @@ private:
 	glm::vec3 rotation; ///< Rotation of model
 	GLuint VAO; ///< vertex Array object for model in openGL
 	GLuint program;///< shader program
-	GLint shaderModelMatLocation, shaderViewMatLocation,shaderProjMatLocation, shader3X3Location; ///<uniformlocations for matrix
+	GLint shaderModelMatLocation, shaderViewMatLocation,shaderProjMatLocation, shader3X3Location,lightPositionLocation; ///<uniformlocations for matrix
 	glm::mat4 modelMatrix; ///< model matrix
 	glm::mat3 modelViewMatrix3x3; ///<model matrix in a 3x3 needed for normals
 	unsigned int numVerts;///<number of verts in model
@@ -57,5 +64,6 @@ private:
 	std::vector<glm::vec3> out_Normals;///< Normals produced from object loader
 	std::vector<glm::vec3> out_Tangents;///< Tangents produced from object loader
 	std::vector<glm::vec3> out_BiTangents;///< BiTangents produced from object loader
+	glm::vec4 lightPos;
 };
 #endif //!MODEL_H

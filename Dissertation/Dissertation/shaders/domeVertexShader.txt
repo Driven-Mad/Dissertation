@@ -21,8 +21,11 @@ uniform mat4 projMat;
 uniform mat3 MV3x3;
 //UP value
 uniform vec3 up = {0.0f,1.0f,0.0f};
+
+uniform vec4 lightPosition;
+
 //Worldspace Light Position
-uniform vec4 worldSpaceLightPos = {200,200,200,1};
+//uniform vec4 worldSpaceLightPos = {1,1,0.2,1};
 
 //outputs to the fragment shader, the Normal
 out vec3 vNormalV;
@@ -34,6 +37,7 @@ out vec3 halfVec;
 out vec2 UV;
 
 void main(){
+
 vec4 eyeSpaceVertPos;
 vec3 vertexNormal_cameraspace = MV3x3 * normalize(vNormalIn);
 vec3 vertexTangent_cameraspace = MV3x3 * normalize(vTangentIn);
@@ -46,7 +50,7 @@ gl_Position = projMat * viewMat * modelMat * vPosition;
 eyeSpaceVertPos = viewMat * modelMat * vPosition;
 
 //Create the different attributes for light calculations and colour to send to the fragment shader.
-vec4 eyeSpaceLightPos = viewMat * worldSpaceLightPos;
+vec4 eyeSpaceLightPos = viewMat * lightPosition;
 lightDirV = TBN * normalize( vec3(eyeSpaceLightPos) - vec3(eyeSpaceVertPos) );
 vec3 eyeDir = TBN * -eyeSpaceVertPos.xyz;
 halfVec = normalize( normalize(eyeDir) + normalize(lightDirV));

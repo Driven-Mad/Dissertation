@@ -20,7 +20,7 @@ uniform vec3 specularColour = {0.0f,0.0f,0.0f};
 //Up vector for calculations
 uniform vec3 up 			= {0.0f,1.0f,0.0f};
 //Shininess value
-uniform float shininess     = 0.5f;
+uniform float shininess     = 0.2f;
 //alpha value
 uniform float alpha         = 1.0f;
 //snow

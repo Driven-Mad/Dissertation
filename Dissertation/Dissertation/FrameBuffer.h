@@ -16,7 +16,7 @@ public:
 	/// \brief deconstructor for frameBuffer.
 	~FrameBuffer(void);
 	/// \brief initialises the framebuffer.
-	void init();
+	void init(int winWidth,int winHeight);
 	/// \brief draws framebuffer, output will be a selection from the user.
 	void draw(int output);
 	/// \brief binds the framebuffer. takes in windowWidth, winowHeight.

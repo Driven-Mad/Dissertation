@@ -53,9 +53,11 @@ private:
 	float camera_Zoom, camera_Left_Right, camera_Up_Down, camera_rotate; ///< Camera attributes
 	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
 	float delta_Time; ///< Deltat time for frame rate.
-	Model *skyDome, *house, *plane, *shelter,*car;
+	Model *skyDome, *house, *plane, *shelter,*car, *light;
 	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5;
 	FrameBuffer *fBuffer;
+	glm::vec4 lightPosition;
+	bool leftShiftPressed,leftAltPressed;
 
 
 };
