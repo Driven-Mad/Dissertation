@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
 	bool go = true;
 	while( go ){
 		//input handler for our app
-		app->inputHandler();
+		//app->inputHandler();
 		//run our application
 		app->run();
 	}

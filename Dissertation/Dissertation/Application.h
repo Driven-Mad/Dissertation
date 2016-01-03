@@ -14,6 +14,7 @@
 #include "TextureLoader.h"
 #include "FrameBuffer.h"
 #include "gtc/matrix_access.hpp"
+#include "Camera.h"
 class Application
 {
 public:
@@ -50,16 +51,13 @@ private:
 	int winPosY; ///< window Y poisition
 	int winWidth; ///< window width
 	int winHeight; ///< window Height
-	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
 	float delta_Time; ///< Deltat time for frame rate.
 	Model *skyDome, *house, *plane, *shelter,*car, *light, *rain;
 	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5, *textLoad6;
 	FrameBuffer *fBuffer;
 	glm::vec4 lightPosition;
-	bool leftShiftPressed,leftAltPressed;
-	float pers_val;
-	glm::vec3 cameraPosition, cameraFront, cameraUp;
-	float field_of_view;
+	bool leftShiftPressed;
+	Camera *camera;
 
 };
 #endif; //!APPLICATION_H

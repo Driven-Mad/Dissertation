@@ -9,11 +9,7 @@ Application::Application(void)
 	winHeight = 960;
 	lastTime = SDL_GetTicks();
 	lightPosition = glm::vec4(1.0f,1.0f,0.2f,1.0f);
-	leftShiftPressed = leftAltPressed = false;
-	cameraPosition = glm::vec3(0.0f, 0.5f,0.0f);
-	cameraFront = glm::vec3(0.0f,0.0f,-1.0f);
-	cameraUp = glm::vec3(0.0f,1.0f,0.0f);
-	field_of_view = 45.0f;
+	leftShiftPressed = false;
 }
 
 
@@ -87,15 +83,10 @@ void Application::init(){
 	textLoad6->loadTexture("assets/rain3.bmp",rain->getProgram());
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
 	fBuffer->init(winWidth,winHeight);
-	pers_val = winWidth/winHeight;
+	camera = new Camera(winHeight,winWidth);
 }
 void Application::run(){
-	current = SDL_GetTicks();
-	delta_Time = (float) (current - lastTime) / 1000.0f;
-	lastTime = current;
-	if( delta_Time < (1.0f/50.0f) ){
-			SDL_Delay((unsigned int) (((1.0f/50.0f) - delta_Time)*1000.0f) );
-	}
+
 	update();
 	draw();
 }
@@ -103,18 +94,18 @@ void Application::draw(){
 	fBuffer->bind(winWidth,winHeight);
 			//bind here
 			textLoad4->enableTextures();
-			car->draw(viewMatrix, projectionMatrix);
+			car->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			textLoad2->enableTextures();
-			house->draw(viewMatrix,projectionMatrix);
+			house->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			textLoad->enableTextures();
-			skyDome->draw(viewMatrix, projectionMatrix);
+			skyDome->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			textLoad3->enableTextures();
-			plane->draw(viewMatrix,projectionMatrix);
+			plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			textLoad5->enableTextures();
-			shelter->draw(viewMatrix,projectionMatrix);
-			light->draw(viewMatrix,projectionMatrix);
+			shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+			light->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			textLoad6->enableTextures();
-			rain->draw(viewMatrix, projectionMatrix);
+			rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			
 			
 	//unbind here
@@ -126,6 +117,12 @@ void Application::draw(){
 	SDL_GL_SwapWindow( window );
 }
 void Application::update(){
+	current = SDL_GetTicks();
+	delta_Time = (float) (current - lastTime) / 1000.0f;
+	lastTime = current;
+	if( delta_Time < (1.0f/50.0f) ){
+			SDL_Delay((unsigned int) (((1.0f/50.0f) - delta_Time)*1000.0f) );
+	}
 	
 	light->setLightPosition(lightPosition);
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
@@ -137,28 +134,15 @@ void Application::update(){
 	car->update(delta_Time,lightPosition);
 	skyDome->rotateY(0.01,delta_Time);
 	light->update(delta_Time,lightPosition);
-	rain->setPosition(cameraPosition);
+	rain->setPosition(camera->getCameraPosition());
 	rain->update(delta_Time,lightPosition);
 	rain->updateUVS(delta_Time);
 	light->setPosition(glm::vec3(lightPosition.x,lightPosition.y,lightPosition.z));
-	projectionMatrix = glm::perspective(glm::radians(field_of_view),pers_val , 0.1f, 100.0f);
-	viewMatrix = glm::lookAt(cameraPosition,cameraPosition+cameraFront,cameraUp);
-	//viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
-	//viewMatrix = glm::rotate(viewMatrix, camera_rotate, glm::vec3(0,1,0));
-	//glm::mat4 invMatrix = glm::inverse(viewMatrix);
-	//glm::vec4 cameraPosition = glm::column(invMatrix,3);
-	//printf("\n camera Pos = %f, %f, %f ",cameraPosition.x, cameraPosition.y,cameraPosition.z);
-	
-	if(field_of_view <=1.0f){
-		field_of_view = 1.0f;
-	}
-	if(field_of_view >=45.0f){
-		field_of_view = 45.0f;
-	}
+	camera->update(delta_Time);
+
 }
 void Application::inputHandler(){
 	SDL_Event incomingEvent;
-	
 		while( SDL_PollEvent( &incomingEvent)){
 			float cameraSpeed = 30.0f * delta_Time ;
 			switch(incomingEvent.type){
@@ -168,58 +152,37 @@ void Application::inputHandler(){
 			case SDL_KEYDOWN:
 				switch( incomingEvent.key.keysym.sym ){
 					case SDLK_q:
-						if(leftAltPressed){
-							//cameraPosition += cameraSpeed;
-						}
 						if(leftShiftPressed){
 							lightPosition.z += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_e:
-						if(leftAltPressed){
-							//cameraPosition -= cameraSpeed;
-						}
 						if(leftShiftPressed){
 							lightPosition.z -=10.0f* delta_Time;
 						}
 						break;
 					case SDLK_w:
-						if(leftAltPressed){
-							cameraPosition += cameraSpeed * cameraFront;
-						}
 						if(leftShiftPressed){
 							lightPosition.y += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_a:
-						if(leftAltPressed){
-							cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
-						}
 						if(leftShiftPressed){
 							lightPosition.x -= 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_s:
-						if(leftAltPressed){
-							cameraPosition -= cameraSpeed * cameraFront;
-						}
 						if(leftShiftPressed){
 							lightPosition.y -= 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_d:
-						if(leftAltPressed){
-							cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
-						}
 						if(leftShiftPressed){
 							lightPosition.x += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_LSHIFT:
 						leftShiftPressed = true;
-						break;
-					case SDLK_LALT:
-						leftAltPressed = true;
 						break;
 				}
 				break;
@@ -228,21 +191,12 @@ void Application::inputHandler(){
 					case SDLK_LSHIFT:
 						leftShiftPressed = false;
 						break;
-					case SDLK_LALT:
-						leftAltPressed = false;
-						break;
 				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				SDL_GetMouseState(&mouse_X, &mouse_Y);
 				break;
 			case SDL_MOUSEWHEEL:
-				if(incomingEvent.wheel.y > 0){
-					field_of_view -= cameraSpeed;
-				}
-				if(incomingEvent.wheel.y < 0){
-					field_of_view += cameraSpeed;
-				}
 				break;
 			}
 		}
