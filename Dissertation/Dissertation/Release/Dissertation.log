@@ -1,10 +1,10 @@
-﻿Build started 02/01/2016 14:41:18.
+﻿Build started 03/01/2016 17:28:02.
      1>Project "G:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          E:\Programs\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\glm /I"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\include" /I"..\SDL\SDL2_image-2.0.0\include" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D GLEW_STATIC /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Application.cpp
          Application.cpp
-     1>Application.cpp(89): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
-     1>Application.cpp(136): warning C4305: 'argument' : truncation from 'double' to 'float'
+     1>Application.cpp(90): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>Application.cpp(138): warning C4305: 'argument' : truncation from 'double' to 'float'
        Link:
          E:\Programs\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\lib\x86" /LIBPATH:"..\SDL\SDL2_image-2.0.0\lib\x86" SDL2.lib SDL2main.lib OpenGL32.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Release\Dissertation.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"G:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.lib" /MACHINE:X86 Release\Application.obj
          Release\FrameBuffer.obj
@@ -25,4 +25,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:02.53
+Time Elapsed 00:00:02.77

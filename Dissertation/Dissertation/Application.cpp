@@ -83,7 +83,8 @@ void Application::init(){
 	textLoad4->loadTexture("assets/pickup_blue.bmp",car->getProgram());
 	textLoad4->loadTexture("assets/pickup_blue_n.bmp",car->getProgram());
 	textLoad6->loadTexture("assets/rain.bmp",rain->getProgram());
-	textLoad6->loadTexture("assets/rain_n.bmp",rain->getProgram());
+	textLoad6->loadTexture("assets/rain2.bmp",rain->getProgram());
+	textLoad6->loadTexture("assets/rain3.bmp",rain->getProgram());
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
 	fBuffer->init(winWidth,winHeight);
 	pers_val = winWidth/winHeight;
@@ -125,6 +126,7 @@ void Application::draw(){
 	SDL_GL_SwapWindow( window );
 }
 void Application::update(){
+	
 	light->setLightPosition(lightPosition);
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,6 +137,7 @@ void Application::update(){
 	car->update(delta_Time,lightPosition);
 	skyDome->rotateY(0.01,delta_Time);
 	light->update(delta_Time,lightPosition);
+	rain->setPosition(cameraPosition);
 	rain->update(delta_Time,lightPosition);
 	rain->updateUVS(delta_Time);
 	light->setPosition(glm::vec3(lightPosition.x,lightPosition.y,lightPosition.z));
@@ -145,7 +148,7 @@ void Application::update(){
 	//glm::mat4 invMatrix = glm::inverse(viewMatrix);
 	//glm::vec4 cameraPosition = glm::column(invMatrix,3);
 	//printf("\n camera Pos = %f, %f, %f ",cameraPosition.x, cameraPosition.y,cameraPosition.z);
-	rain->setPosition(cameraPosition);
+	
 	if(field_of_view <=1.0f){
 		field_of_view = 1.0f;
 	}
