@@ -44,9 +44,9 @@ public:
 	void setLightPosition(glm::vec4 a);
 	/// \brief gets Light position
 	glm::vec4 getLightPosition();
-
+	
 	void rotateY(float speed, float DT);
-
+	void updateUVS(float dt);
 	glm::mat4 getModelMatrix();
 	void setModelMatrix(glm::mat4 a);
 private:
@@ -65,5 +65,7 @@ private:
 	std::vector<glm::vec3> out_Tangents;///< Tangents produced from object loader
 	std::vector<glm::vec3> out_BiTangents;///< BiTangents produced from object loader
 	glm::vec4 lightPos;
+	bool enableUVupdate;
+	GLuint UVBuffer;
 };
 #endif //!MODEL_H

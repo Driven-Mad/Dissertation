@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
 		//input handler for our app
 		app->inputHandler();
 		//run our application
-		app->run(app->getDeltaTime());
+		app->run();
 	}
 	//cleaan up
 	app->~Application();

@@ -17,6 +17,7 @@ Model::Model(char *objectFP, char *fragShaderFP, char *vertShaderFP){
 	initaliseShaders();
 	modelMatrix = glm::translate(glm::mat4(1.0f), position );
 	lightPos = glm::vec4(1.0f,1.0f,0.2f,1.0f);
+	enableUVupdate = false;
 }
 
 
@@ -61,10 +62,10 @@ void Model::initaliseVAO(){
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,  sizeof(glm::vec3), 0 );
 	glEnableVertexAttribArray(1);
 	//2
-	GLuint UVBuffer = 0;
+	UVBuffer = 0;
 	glGenBuffers(1, &UVBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
-	glBufferData(GL_ARRAY_BUFFER, out_UVs.size() * sizeof(glm::vec2), &out_UVs[0],GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, out_UVs.size() * sizeof(glm::vec2), &out_UVs[0],GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,  sizeof(glm::vec2), 0 );
 	glEnableVertexAttribArray(2);
 	//3
@@ -101,7 +102,7 @@ void Model::initaliseShaders(){
 }
 
 void Model::update(float DT, glm::vec4 lightPosition){
-	modelMatrix = glm::translate(glm::mat4(1.0f), position );
+	modelMatrix = glm::translate(glm::mat4(1.0f), position);
 	lightPos = lightPosition;
 }
 
@@ -113,7 +114,10 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 		glBindVertexArray( VAO );
 			//create a model matrix 3x3 for my normals.
 			modelViewMatrix3x3 = glm::mat3(viewMatrix * modelMatrix);
-			glEnable(GL_CULL_FACE);
+			//glEnable(GL_CULL_FACE);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			glFrontFace(GL_CCW);
 			// Send matrices to the shader as uniforms like this:
 			glUniformMatrix4fv(shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix) );
@@ -179,4 +183,15 @@ void Model::setLightPosition(glm::vec4 a){
 /// \brief gets Light position
 glm::vec4 Model::getLightPosition(){
 	return lightPos;
+}
+
+void Model::updateUVS(float dt){
+	for(int x=0; x<out_UVs.size(); x++){
+		out_UVs[x].y -= 0.1f *dt;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);
+	glBufferData(GL_ARRAY_BUFFER, out_UVs.size() * sizeof(glm::vec2), &out_UVs[0],GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,  sizeof(glm::vec2), 0 );
+	glEnableVertexAttribArray(2);
+	glBindVertexArray( 0 );
 }

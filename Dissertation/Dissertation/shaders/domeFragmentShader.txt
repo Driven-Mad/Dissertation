@@ -28,11 +28,12 @@ uniform sampler2D textSampler0;
 uniform sampler2D textSampler1;
 
 //out put the colour
-out vec3 colour;
+out vec4 colour;
 
 void main(){
 vec3 skyTextureNormal = normalize(texture2D(textSampler1, UV).rgb*2.0 - 1.0);
 vec3 diffuse = texture(textSampler0, UV).rgb * max( dot( skyTextureNormal, lightDirV ), 0);
 vec3 specular= texture(textSampler0, UV).rgb * dot( skyTextureNormal, lightDirV ) * max( dot( skyTextureNormal, halfVec ), 0) * shininess;
-colour = diffuse + specular + emissiveColour + ambientColour ;
+vec3 temp = diffuse + specular + emissiveColour + ambientColour ;
+colour = vec4(temp.x,temp.y,temp.z,1.0f);
 }

@@ -1,0 +1,11 @@
+#version 330
+
+layout(location = 0) in vec2 vs_position;
+
+out vec2 UV;
+
+void main()
+{
+UV = (vs_position + 1.0) / 2.0;
+gl_Position = vec4(vs_position, 0.0, 1.0);
+}

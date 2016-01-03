@@ -1,0 +1,9 @@
+#version 330 core
+
+//output the colour
+layout(location = 0) out vec3 colour;
+
+void main(){
+//set the colour to white
+colour = vec3(1.0f,1.0f,1.0f);
+}

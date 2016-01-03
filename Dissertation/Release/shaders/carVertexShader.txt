@@ -1,0 +1,59 @@
+#version 330 core
+
+//Vertex position coming from the program
+layout(location = 0) in vec4 vPosition;
+//Normal coming from the program
+layout(location = 1) in vec3 vNormalIn;
+//UVS coming from the program
+layout(location = 2) in vec2 vUVIn; 
+//Tangents coming from the program
+layout(location = 3) in vec3 vTangentIn;
+//BiTangents coming from the program
+layout(location = 4) in vec3 vBiTangentIn;
+
+//model matrix coming from the program
+uniform mat4 modelMat;
+//view matrix coming from the program
+uniform mat4 viewMat;
+//projection matrix coming from the program
+uniform mat4 projMat;
+//model 3X3 matrix coming from the program
+uniform mat3 MV3x3;
+
+uniform vec4 lightPosition;
+//UP value
+uniform vec3 up = {0.0f,1.0f,0.0f};
+//Worldspace Light Position
+
+// X - Higher/lower - rotation round - W
+//uniform vec4 worldSpaceLightPos ={1,1,0.2,1};
+
+//outputs to the fragment shader, the Normal
+out vec3 vNormalV;
+//outputs to the fragment shader, the Light Direction
+out vec3 lightDirV;
+//outputs to the fragment shader, the half Vector
+out vec3 halfVec;
+//outputs to the fragment shader, the UV
+out vec2 UV;
+
+void main(){
+//switch everything to tangent space.
+vec4 eyeSpaceVertPos;
+vec3 vertexNormal_cameraspace = MV3x3 * normalize(vNormalIn);
+vec3 vertexTangent_cameraspace = MV3x3 * normalize(vTangentIn);
+vec3 vertexBitangent_cameraspace = MV3x3 * normalize(vBiTangentIn);
+
+mat3 TBN = transpose(mat3(vertexTangent_cameraspace,vertexBitangent_cameraspace,vertexNormal_cameraspace));
+vNormalV = MV3x3 * vNormalIn;
+
+gl_Position = projMat * viewMat * modelMat * vPosition;
+eyeSpaceVertPos = viewMat * modelMat * vPosition;
+
+//Create the different attributes for light calculations and colour to send to the fragment shader.
+vec4 eyeSpaceLightPos = viewMat * lightPosition;
+lightDirV = TBN * normalize( vec3(eyeSpaceLightPos) - vec3(eyeSpaceVertPos) );
+vec3 eyeDir = TBN * -eyeSpaceVertPos.xyz;
+halfVec = normalize( normalize(eyeDir) + normalize(lightDirV));
+UV = vUVIn;
+}

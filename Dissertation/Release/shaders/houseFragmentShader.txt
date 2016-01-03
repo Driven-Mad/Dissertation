@@ -1,0 +1,45 @@
+#version 330 core
+
+//Light Direction coming from the vertex shader
+in vec3 lightDirV;
+//Normal coming from the vertex shader
+in vec3 vNormalV;
+//halfvec coming from the vertex shader
+in vec3 halfVec; 
+//UV coming from the vertex shader
+in vec2 UV; 
+
+//snow on/off coming from the program 
+uniform int snowOn;
+//Different colours
+uniform vec3 lightColour	= {1,1,1};
+uniform vec3 emissiveColour = {0,0,0};
+uniform vec3 ambientColour  = {0.1f,0.1f,0.2f};
+uniform vec3 diffuseColour  = {0.8f,0.1f,0.1f};
+uniform vec3 specularColour = {0.0f,0.0f,0.0f};
+//Up vector for calculations
+uniform vec3 up 			= {0.0f,1.0f,0.0f};
+//Shininess value
+uniform float shininess     = 0.2f;
+//alpha value
+uniform float alpha         = 1.0f;
+//snow
+uniform sampler2D textSampler0; 
+//rock
+uniform sampler2D textSampler1;
+
+//out put the colour
+out vec3 colour;
+
+void main(){
+//Give me the normalised textures
+vec3 rockTextureNormal = normalize(texture2D(textSampler1, UV).rgb*2.0 - 1.0);
+vec3 diffuseT2 = texture(textSampler0, UV).rgb * lightColour * max( dot( rockTextureNormal, lightDirV ), 0);
+vec3 specularT2 = texture(textSampler0, UV ).rgb * lightColour * dot( rockTextureNormal, lightDirV ) * max( dot( rockTextureNormal, halfVec ), 0) * shininess;
+
+
+colour = diffuseT2 + specularT2 ;
+
+//always add emissiveColour and ambientColour on either texture
+colour += emissiveColour + ambientColour; 
+}

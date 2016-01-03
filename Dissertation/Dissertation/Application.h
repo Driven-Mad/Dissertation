@@ -13,7 +13,7 @@
 #include "Model.h"
 #include "TextureLoader.h"
 #include "FrameBuffer.h"
-
+#include "gtc/matrix_access.hpp"
 class Application
 {
 public:
@@ -26,11 +26,11 @@ public:
 	/// \brief initalises the application
 	void init();
 	/// \brief runs the application, uses Delta Time
-	void run(float DT);
+	void run();
 	/// \brief draws the application to screen
 	void draw();
 	/// \brief updates application based on Delta Time
-	void update(float DT);
+	void update();
 	/// \brief input handler for the application
 	void inputHandler();
 	/// \brief returns delta time of application
@@ -50,15 +50,16 @@ private:
 	int winPosY; ///< window Y poisition
 	int winWidth; ///< window width
 	int winHeight; ///< window Height
-	float camera_Zoom, camera_Left_Right, camera_Up_Down, camera_rotate; ///< Camera attributes
 	glm::mat4 projectionMatrix, viewMatrix; ///< matrix for viewing
 	float delta_Time; ///< Deltat time for frame rate.
-	Model *skyDome, *house, *plane, *shelter,*car, *light;
-	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5;
+	Model *skyDome, *house, *plane, *shelter,*car, *light, *rain;
+	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5, *textLoad6;
 	FrameBuffer *fBuffer;
 	glm::vec4 lightPosition;
 	bool leftShiftPressed,leftAltPressed;
-
+	float pers_val;
+	glm::vec3 cameraPosition, cameraFront, cameraUp;
+	float field_of_view;
 
 };
 #endif; //!APPLICATION_H

@@ -23,7 +23,7 @@ void ProgramLoader::loadVShader(char *filepath){
 	}
 	// Create the vertex shader
 	vShader = glCreateShader( GL_VERTEX_SHADER );
-	//find the size of the Vdata
+	//find the size o	f the Vdata
 	int length = Vdata.length();
 	//get our shader
 	const GLchar* vStr = Vdata.c_str();

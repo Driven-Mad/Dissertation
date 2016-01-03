@@ -7,13 +7,13 @@ Application::Application(void)
 	winPosY = 100;
 	winWidth = 1280;
 	winHeight = 960;
-	camera_Zoom = -15.0f;
-	camera_Left_Right = -4.5f;
-	camera_Up_Down = -3.0f;
 	lastTime = SDL_GetTicks();
-	camera_rotate = 0.0f;
 	lightPosition = glm::vec4(1.0f,1.0f,0.2f,1.0f);
 	leftShiftPressed = leftAltPressed = false;
+	cameraPosition = glm::vec3(0.0f, 0.5f,0.0f);
+	cameraFront = glm::vec3(0.0f,0.0f,-1.0f);
+	cameraUp = glm::vec3(0.0f,1.0f,0.0f);
+	field_of_view = 45.0f;
 }
 
 
@@ -65,11 +65,13 @@ void Application::init(){
 	shelter = new Model("assets/Old_Shelter.obj","shaders/houseFragmentShader.txt","shaders/houseVertexShader.txt");
 	car = new Model("assets/pickup_truck.obj","shaders/carFragmentShader.txt","shaders/carVertexShader.txt");
 	light = new Model("assets/light.obj","shaders/lightFragmentShader.txt","shaders/lightVertexShader.txt");
+	rain = new Model("assets/DECone.obj","shaders/rainFragmentShader.txt","shaders/rainVertexShader.txt");
 	textLoad = new TextureLoader();
 	textLoad2 = new TextureLoader();
 	textLoad3 = new TextureLoader();
 	textLoad4 = new TextureLoader();
 	textLoad5 = new TextureLoader();
+	textLoad6 = new TextureLoader();
 	textLoad->loadTexture("assets/Sky.bmp",skyDome->getProgram());
 	textLoad->loadTexture("assets/SkyNormal.bmp",skyDome->getProgram());
 	textLoad2->loadTexture("assets/houseA.bmp",house->getProgram());
@@ -80,17 +82,20 @@ void Application::init(){
 	textLoad5->loadTexture("assets/Metal line bump.bmp",shelter->getProgram());
 	textLoad4->loadTexture("assets/pickup_blue.bmp",car->getProgram());
 	textLoad4->loadTexture("assets/pickup_blue_n.bmp",car->getProgram());
+	textLoad6->loadTexture("assets/rain.bmp",rain->getProgram());
+	textLoad6->loadTexture("assets/rain_n.bmp",rain->getProgram());
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
 	fBuffer->init(winWidth,winHeight);
+	pers_val = winWidth/winHeight;
 }
-void Application::run(float DT){
+void Application::run(){
 	current = SDL_GetTicks();
 	delta_Time = (float) (current - lastTime) / 1000.0f;
 	lastTime = current;
 	if( delta_Time < (1.0f/50.0f) ){
 			SDL_Delay((unsigned int) (((1.0f/50.0f) - delta_Time)*1000.0f) );
-		}
-	update(DT);
+	}
+	update();
 	draw();
 }
 void Application::draw(){
@@ -107,6 +112,8 @@ void Application::draw(){
 			textLoad5->enableTextures();
 			shelter->draw(viewMatrix,projectionMatrix);
 			light->draw(viewMatrix,projectionMatrix);
+			textLoad6->enableTextures();
+			rain->draw(viewMatrix, projectionMatrix);
 			
 			
 	//unbind here
@@ -117,25 +124,40 @@ void Application::draw(){
 	fBuffer->cleanUp();
 	SDL_GL_SwapWindow( window );
 }
-void Application::update(float DT){
+void Application::update(){
 	light->setLightPosition(lightPosition);
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	skyDome->update(DT,light->getLightPosition());
-	house->update(DT,light->getLightPosition());
-	plane->update(DT,light->getLightPosition());
-	shelter->update(DT,light->getLightPosition());
-	car->update(DT,light->getLightPosition());
-	skyDome->rotateY(0.01,DT);
-	light->update(DT,light->getLightPosition());
+	skyDome->update(delta_Time,lightPosition);
+	house->update(delta_Time,lightPosition);
+	plane->update(delta_Time,lightPosition);
+	shelter->update(delta_Time,lightPosition);
+	car->update(delta_Time,lightPosition);
+	skyDome->rotateY(0.01,delta_Time);
+	light->update(delta_Time,lightPosition);
+	rain->update(delta_Time,lightPosition);
+	rain->updateUVS(delta_Time);
 	light->setPosition(glm::vec3(lightPosition.x,lightPosition.y,lightPosition.z));
-	projectionMatrix = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
-	viewMatrix = glm::rotate(viewMatrix, camera_rotate, glm::vec3(0,1,0));
+	projectionMatrix = glm::perspective(glm::radians(field_of_view),pers_val , 0.1f, 100.0f);
+	viewMatrix = glm::lookAt(cameraPosition,cameraPosition+cameraFront,cameraUp);
+	//viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(camera_Left_Right,camera_Up_Down,camera_Zoom) );
+	//viewMatrix = glm::rotate(viewMatrix, camera_rotate, glm::vec3(0,1,0));
+	//glm::mat4 invMatrix = glm::inverse(viewMatrix);
+	//glm::vec4 cameraPosition = glm::column(invMatrix,3);
+	//printf("\n camera Pos = %f, %f, %f ",cameraPosition.x, cameraPosition.y,cameraPosition.z);
+	rain->setPosition(cameraPosition);
+	if(field_of_view <=1.0f){
+		field_of_view = 1.0f;
+	}
+	if(field_of_view >=45.0f){
+		field_of_view = 45.0f;
+	}
 }
 void Application::inputHandler(){
 	SDL_Event incomingEvent;
+	
 		while( SDL_PollEvent( &incomingEvent)){
+			float cameraSpeed = 30.0f * delta_Time ;
 			switch(incomingEvent.type){
 			case SDL_QUIT:
 				return;
@@ -144,50 +166,50 @@ void Application::inputHandler(){
 				switch( incomingEvent.key.keysym.sym ){
 					case SDLK_q:
 						if(leftAltPressed){
-							camera_rotate += 0.1f;
+							//cameraPosition += cameraSpeed;
 						}
 						if(leftShiftPressed){
-							lightPosition.z += 0.1f;
+							lightPosition.z += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_e:
 						if(leftAltPressed){
-							camera_rotate -= 0.1f;
+							//cameraPosition -= cameraSpeed;
 						}
 						if(leftShiftPressed){
-							lightPosition.z -= 0.1f;
+							lightPosition.z -=10.0f* delta_Time;
 						}
 						break;
 					case SDLK_w:
 						if(leftAltPressed){
-							camera_Up_Down -= 0.1f;
+							cameraPosition += cameraSpeed * cameraFront;
 						}
 						if(leftShiftPressed){
-							lightPosition.y += 0.1f;
+							lightPosition.y += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_a:
 						if(leftAltPressed){
-							camera_Left_Right += 0.1f;
+							cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
 						}
 						if(leftShiftPressed){
-							lightPosition.x -= 0.1f;
+							lightPosition.x -= 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_s:
 						if(leftAltPressed){
-							camera_Up_Down += 0.1f;
+							cameraPosition -= cameraSpeed * cameraFront;
 						}
 						if(leftShiftPressed){
-							lightPosition.y -= 0.1f;
+							lightPosition.y -= 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_d:
 						if(leftAltPressed){
-							camera_Left_Right -= 0.1f;
+							cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
 						}
 						if(leftShiftPressed){
-							lightPosition.x += 0.1f;
+							lightPosition.x += 10.0f* delta_Time;
 						}
 						break;
 					case SDLK_LSHIFT:
@@ -213,11 +235,12 @@ void Application::inputHandler(){
 				break;
 			case SDL_MOUSEWHEEL:
 				if(incomingEvent.wheel.y > 0){
-					camera_Zoom += 0.5f;
+					field_of_view -= cameraSpeed;
 				}
 				if(incomingEvent.wheel.y < 0){
-					camera_Zoom -= 0.5f;
+					field_of_view += cameraSpeed;
 				}
+				break;
 			}
 		}
 }
