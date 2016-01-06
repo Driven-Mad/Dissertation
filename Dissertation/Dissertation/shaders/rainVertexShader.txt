@@ -54,5 +54,5 @@ vec4 eyeSpaceLightPos = viewMat * lightPosition;
 lightDirV = TBN * normalize( vec3(eyeSpaceLightPos) - vec3(eyeSpaceVertPos) );
 vec3 eyeDir = TBN * -eyeSpaceVertPos.xyz;
 halfVec = normalize( normalize(eyeDir) + normalize(lightDirV));
-UV = vUVIn*20;
+UV = vUVIn;
 }

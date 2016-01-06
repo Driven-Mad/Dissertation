@@ -36,72 +36,44 @@ uniform sampler2D textSampler2;
 out vec4 colour;
 
 void main(){
-vec3 textureColour = texture2D(textSampler0,UV.xy).xyz;
-vec3 textureColour2 = texture2D(textSampler1,UV.xy).xyz;
-vec3 textureColour3 = texture2D(textSampler2,UV.xy).xyz;
+float offset = 10f;
+float offset2 = 15f;
+float offset3 = 35f;
+vec3 textureColour = texture2D(textSampler0,UV.xy * offset).xyz;
+vec3 textureColour2 = texture2D(textSampler0,UV.xy* offset2).xyz;
+vec3 textureColour3 = texture2D(textSampler0,UV.xy* offset3).xyz;
 float alpha,alpha2,alpha3;
 ///////////FIRST TEXTURE
-if((textureColour.x  <= 0.1) && (textureColour.y <= 0.1) && (textureColour.z  <= 0.1)){
+//alpha = textureColour.x;
+if(textureColour.x  <= 0.1f){
 alpha = 0.0f;
 }
 else
 {
-alpha = 0.1f;
+alpha = 0.2f;
 }
 vec4 temp_rain = vec4(textureColour.x,textureColour.y,textureColour.z,alpha);
 ///////////second TEXTURE
-if((textureColour2.x  <= 0.1) && (textureColour2.y <= 0.1) && (textureColour2.z  <= 0.1)){
+//alpha2 = textureColour2.x;
+if(textureColour2.x  <= 0.1f){
 alpha2 = 0.0f;
 }
 else
 {
-alpha2 = 0.1f;
+alpha2 =  0.2f;;
 }
 vec4 temp_rain2 = vec4(textureColour2.x,textureColour2.y,textureColour2.z,alpha2);
 ///////////third TEXTURE
-if((textureColour3.x  <= 0.1) && (textureColour3.y <= 0.1) && (textureColour3.z  <= 0.1)){
+//alpha3 = textureColour3.x;
+if(textureColour3.x  <= 0.1f){
 alpha3 = 0.0f;
 }
 else
 {
-alpha3 = 0.1f;
+alpha3 =  0.2f;;
 }
 vec4 temp_rain3 = vec4(textureColour3.x,textureColour3.y,textureColour3.z,alpha3);
 colour = temp_rain + temp_rain2 + temp_rain3;
-//vec3 TextureNormal = normalize(texture2D(textSampler1, UV).rgb*2.0 - 1.0);
-//vec3 diffuse = textureColour * max( dot( TextureNormal, lightDirV ), 0);
-//vec3 specular= textureColour * dot( TextureNormal, lightDirV ) * max( dot( TextureNormal, halfVec ), 0) * shininess;
-//vec3 temp = diffuse + specular + emissiveColour + ambientColour;
-//vec4 temp_rain = vec4(temp.x,temp.y,temp.z,alpha);
 
-///////////////SECOND TEXTURE
-//if((textureColour2.x  <= 0.15) && (textureColour2.y <= 0.15) && (textureColour2.z  <= 0.15)){
-//alpha2 = 0.0f;
-//}
-//else
-//{
-//alpha2 = 0.1f;
-//}
-//
-//vec3 TextureNormal2 = normalize(texture2D(textSampler3, UV).rgb*2.0 - 1.0);
-//vec3 diffuse2 = textureColour2 * max( dot( TextureNormal2, lightDirV ), 0);
-//vec3 specular2 = textureColour2 * dot( TextureNormal2, lightDirV ) * max( dot( TextureNormal2, halfVec ), 0) * shininess;
-//vec3 temp2 = diffuse2 + specular2 + emissiveColour + ambientColour;
-//vec4 temp_rain2 = vec4(temp2.x,temp2.y,temp2.z,alpha2);
-//
-/////////////THIRD TEXTURE
-//if((textureColour3.x  <= 0.15) && (textureColour3.y <= 0.15) && (textureColour3.z  <= 0.15)){
-//alpha3 = 0.0f;
-//}
-//else
-//{
-//alpha3 = 0.3f;
-//}
-//
-//vec3 TextureNormal3 = normalize(texture2D(textSampler5, UV).rgb*2.0 - 1.0);
-//vec3 diffuse3 = textureColour3 * max( dot( TextureNormal3, lightDirV ), 0);
-//vec3 specular3 = textureColour3 * dot( TextureNormal3, lightDirV ) * max( dot( TextureNormal3, halfVec ), 0) * shininess;
-//vec3 temp3 = diffuse3 + specular3 + emissiveColour + ambientColour;
-//vec4 temp_rain3 = vec4(temp3.x,temp3.y,temp3.z,alpha3);
 
 }
