@@ -27,7 +27,7 @@ public:
 	/// \brief initalises the application
 	void init();
 	/// \brief runs the application, uses Delta Time
-	void run();
+	bool run();
 	/// \brief draws the application to screen
 	void draw();
 	/// \brief updates application based on Delta Time
@@ -42,7 +42,6 @@ public:
 	int getHeight();
 
 private:
-	int mouse_X, mouse_Y; ///<Mouse Co-ordinates
 	SDL_Window *window; ///< Window for SDL
 	SDL_Renderer *renderer; ///< Renderer for SDL
 	SDL_GLContext glContext; ///< GL context for window
@@ -57,6 +56,7 @@ private:
 	glm::vec4 lightPosition;
 	bool leftShiftPressed;
 	Camera *camera;
+	bool exit;
 
 };
 #endif; //!APPLICATION_H

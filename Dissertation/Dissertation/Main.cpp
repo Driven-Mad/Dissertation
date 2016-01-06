@@ -11,12 +11,12 @@ int main(int argc, char *argv[]){
 	Application *app = new Application;
 	//Initialise all our variables in our application.
 	app->init();
-	bool go = true;
-	while( go ){
+	bool quit = false;
+	while( !quit ){
 		//input handler for our app
 		//app->inputHandler();
 		//run our application
-		app->run();
+		quit = app->run();
 	}
 	//cleaan up
 	app->~Application();

@@ -9,6 +9,7 @@ Camera::Camera(float screen_h, float screen_w)
 	cameraUp = glm::vec3(0.0f,1.0f,0.0f);
 	field_of_view = 45.0f;
 	leftAltPressed = false;
+	sensitivity = 0.2f;
 }
 
 
@@ -30,7 +31,7 @@ void Camera::update(float DT){
 
 void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
 	
-	float cameraSpeed = 60.0f * DT ;
+	float cameraSpeed = 30.0f * DT ;
 	switch(incomingEvent.type){
 	case SDL_QUIT:
 		return;
@@ -69,8 +70,33 @@ void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
 				break;
 		}
 		break;
-	case SDL_MOUSEBUTTONDOWN:
-		SDL_GetMouseState(&mouse_X, &mouse_Y);
+	case SDL_MOUSEMOTION:
+		mouse_X = incomingEvent.motion.x;
+		mouse_Y = -incomingEvent.motion.y;
+		mouse_X_offset = mouse_X - old_mouse_X;
+		mouse_Y_offset = mouse_Y - old_mouse_Y;
+		old_mouse_X = mouse_X;
+		old_mouse_Y = mouse_Y;
+
+		
+		mouse_X_offset *= sensitivity;
+		mouse_Y_offset *= sensitivity;
+
+		yaw += mouse_X_offset;
+		pitch += mouse_Y_offset;
+
+		if(pitch> 89.0f){
+			pitch = 89.0f;
+		}
+		if(pitch < -89.0f){
+			pitch = -89.0f;
+		}
+
+		
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.y = sin(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(front);
 		break;
 	case SDL_MOUSEWHEEL:
 		if(incomingEvent.wheel.y > 0){

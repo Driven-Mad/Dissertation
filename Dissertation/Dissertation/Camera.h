@@ -19,7 +19,13 @@ private:
 	float pers_val,field_of_view;
 	glm::vec3 cameraPosition, cameraFront, cameraUp;
 	bool leftAltPressed;
-	int mouse_X, mouse_Y; ///<Mouse Co-ordinates
+	float mouse_X, mouse_Y; ///<Mouse Co-ordinates
+	float old_mouse_X, old_mouse_Y;
+	float pitch, yaw;
+	float mouse_X_offset;
+	float mouse_Y_offset;
+	float sensitivity;
+	glm::vec3 front;
 
 };
 

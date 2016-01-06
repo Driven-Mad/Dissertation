@@ -3,13 +3,14 @@
 
 Application::Application(void)
 {
-	winPosX = 100;
-	winPosY = 100;
-	winWidth = 1280;
-	winHeight = 960;
+	winPosX = 0;
+	winPosY = 0;
+	winWidth = 1920;
+	winHeight = 1080;
 	lastTime = SDL_GetTicks();
 	lightPosition = glm::vec4(1.0f,1.0f,0.2f,1.0f);
 	leftShiftPressed = false;
+	exit = false;
 }
 
 
@@ -47,7 +48,7 @@ void Application::init(){
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE,16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	window = SDL_CreateWindow("Dissertation", winPosX,winPosY,winWidth,winHeight,SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("Dissertation", winPosX,winPosY,winWidth,winHeight,SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_MAXIMIZED);
 	renderer = SDL_CreateRenderer (window, -1,0);
 	glContext = SDL_GL_CreateContext(window);
 	if(!InitGL() ){
@@ -80,10 +81,11 @@ void Application::init(){
 	fBuffer->init(winWidth,winHeight);
 	camera = new Camera(winHeight,winWidth);
 }
-void Application::run(){
+bool Application::run(){
 
 	update();
 	draw();
+	return exit;
 }
 void Application::draw(){
 	fBuffer->bind(winWidth,winHeight);
@@ -129,6 +131,9 @@ void Application::update(){
 	camera->update(delta_Time);
 	SDL_Event incomingEvent;
 	while( SDL_PollEvent( &incomingEvent)){
+		if(incomingEvent.type == SDL_QUIT){
+			exit = true;
+		}
 		camera->cameraMovement(delta_Time,incomingEvent);
 		lightMovement(incomingEvent);
 	}
@@ -183,11 +188,6 @@ void Application::lightMovement(SDL_Event incomingEvent){
 				leftShiftPressed = false;
 				break;
 		}
-		break;
-	case SDL_MOUSEBUTTONDOWN:
-		SDL_GetMouseState(&mouse_X, &mouse_Y);
-		break;
-	case SDL_MOUSEWHEEL:
 		break;
 	}
 		
