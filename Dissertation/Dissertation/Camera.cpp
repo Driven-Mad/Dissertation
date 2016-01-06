@@ -26,62 +26,60 @@ void Camera::update(float DT){
 	if(field_of_view >=45.0f){
 		field_of_view = 45.0f;
 	}
-	cameraMovement(DT);
 }
 
-void Camera::cameraMovement(float DT){
-	SDL_Event incomingEvent;
-		while( SDL_PollEvent( &incomingEvent)){
-			float cameraSpeed = 30.0f * DT ;
-			switch(incomingEvent.type){
-			case SDL_QUIT:
-				return;
-				break;
-			case SDL_KEYDOWN:
-				switch( incomingEvent.key.keysym.sym ){
-					case SDLK_w:
-						if(leftAltPressed){
-							cameraPosition += cameraSpeed * cameraFront;
-						}
-						break;
-					case SDLK_a:
-						if(leftAltPressed){
-							cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
-						}
-						break;
-					case SDLK_s:
-						if(leftAltPressed){
-							cameraPosition -= cameraSpeed * cameraFront;
-						}
-						break;
-					case SDLK_d:
-						if(leftAltPressed){
-							cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
-						}
-						break;
-					case SDLK_LALT:
-						leftAltPressed = true;
-						break;
+void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
+	
+	float cameraSpeed = 60.0f * DT ;
+	switch(incomingEvent.type){
+	case SDL_QUIT:
+		return;
+		break;
+	case SDL_KEYDOWN:
+		switch( incomingEvent.key.keysym.sym ){
+			case SDLK_w:
+				if(leftAltPressed){
+					cameraPosition += cameraSpeed * cameraFront;
 				}
 				break;
-			case SDL_KEYUP:
-				switch(incomingEvent.key.keysym.sym){
-					case SDLK_LALT:
-						leftAltPressed = false;
-						break;
+			case SDLK_a:
+				if(leftAltPressed){
+					cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
 				}
 				break;
-			case SDL_MOUSEBUTTONDOWN:
-				SDL_GetMouseState(&mouse_X, &mouse_Y);
-				break;
-			case SDL_MOUSEWHEEL:
-				if(incomingEvent.wheel.y > 0){
-					field_of_view -= cameraSpeed;
-				}
-				if(incomingEvent.wheel.y < 0){
-					field_of_view += cameraSpeed;
+			case SDLK_s:
+				if(leftAltPressed){
+					cameraPosition -= cameraSpeed * cameraFront;
 				}
 				break;
-			}
+			case SDLK_d:
+				if(leftAltPressed){
+					cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
+				}
+				break;
+			case SDLK_LALT:
+				leftAltPressed = true;
+				break;
 		}
+		break;
+	case SDL_KEYUP:
+		switch(incomingEvent.key.keysym.sym){
+			case SDLK_LALT:
+				leftAltPressed = false;
+				break;
+		}
+		break;
+	case SDL_MOUSEBUTTONDOWN:
+		SDL_GetMouseState(&mouse_X, &mouse_Y);
+		break;
+	case SDL_MOUSEWHEEL:
+		if(incomingEvent.wheel.y > 0){
+			field_of_view -= cameraSpeed;
+		}
+		if(incomingEvent.wheel.y < 0){
+			field_of_view += cameraSpeed;
+		}
+		break;
+	}
+		
 }

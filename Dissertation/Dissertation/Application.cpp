@@ -62,25 +62,20 @@ void Application::init(){
 	car = new Model("assets/pickup_truck.obj","shaders/carFragmentShader.txt","shaders/carVertexShader.txt");
 	light = new Model("assets/light.obj","shaders/lightFragmentShader.txt","shaders/lightVertexShader.txt");
 	rain = new Model("assets/DECone.obj","shaders/rainFragmentShader.txt","shaders/rainVertexShader.txt");
-	textLoad = new TextureLoader();
-	textLoad2 = new TextureLoader();
-	textLoad3 = new TextureLoader();
-	textLoad4 = new TextureLoader();
-	textLoad5 = new TextureLoader();
-	textLoad6 = new TextureLoader();
-	textLoad->loadTexture("assets/Sky.bmp",skyDome->getProgram());
-	textLoad->loadTexture("assets/SkyNormal.bmp",skyDome->getProgram());
-	textLoad2->loadTexture("assets/houseA.bmp",house->getProgram());
-	textLoad2->loadTexture("assets/houseANormal.bmp",house->getProgram());
-	textLoad3->loadTexture("assets/grass.bmp",plane->getProgram());
-	textLoad3->loadTexture("assets/grassNormal.bmp",plane->getProgram());
-	textLoad5->loadTexture("assets/Curve.bmp", shelter->getProgram());
-	textLoad5->loadTexture("assets/Metal line bump.bmp",shelter->getProgram());
-	textLoad4->loadTexture("assets/pickup_blue.bmp",car->getProgram());
-	textLoad4->loadTexture("assets/pickup_blue_n.bmp",car->getProgram());
-	textLoad6->loadTexture("assets/rain.bmp",rain->getProgram());
-	textLoad6->loadTexture("assets/rain2.bmp",rain->getProgram());
-	textLoad6->loadTexture("assets/rain3.bmp",rain->getProgram());
+	
+	skyDome->loadTexture("assets/Sky.bmp");
+	skyDome->loadTexture("assets/SkyNormal.bmp");
+	house->loadTexture("assets/houseA.bmp");
+	house->loadTexture("assets/houseANormal.bmp");
+	plane->loadTexture("assets/grass.bmp");
+	plane->loadTexture("assets/grassNormal.bmp");
+	shelter->loadTexture("assets/Curve.bmp");
+	shelter->loadTexture("assets/Metal line bump.bmp");
+	car->loadTexture("assets/pickup_blue.bmp");
+	car->loadTexture("assets/pickup_blue_n.bmp");
+	rain->loadTexture("assets/rain.bmp");
+	rain->loadTexture("assets/rain2.bmp");
+	rain->loadTexture("assets/rain3.bmp");
 	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
 	fBuffer->init(winWidth,winHeight);
 	camera = new Camera(winHeight,winWidth);
@@ -93,18 +88,12 @@ void Application::run(){
 void Application::draw(){
 	fBuffer->bind(winWidth,winHeight);
 			//bind here
-			textLoad4->enableTextures();
 			car->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			textLoad2->enableTextures();
 			house->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			textLoad->enableTextures();
 			skyDome->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			textLoad3->enableTextures();
 			plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			textLoad5->enableTextures();
 			shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			light->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			textLoad6->enableTextures();
 			rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			
 			
@@ -123,7 +112,6 @@ void Application::update(){
 	if( delta_Time < (1.0f/50.0f) ){
 			SDL_Delay((unsigned int) (((1.0f/50.0f) - delta_Time)*1000.0f) );
 	}
-	
 	light->setLightPosition(lightPosition);
 	glClearColor(1.0f,0.5f,0.3f,0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -139,67 +127,70 @@ void Application::update(){
 	rain->updateUVS(delta_Time);
 	light->setPosition(glm::vec3(lightPosition.x,lightPosition.y,lightPosition.z));
 	camera->update(delta_Time);
+	SDL_Event incomingEvent;
+	while( SDL_PollEvent( &incomingEvent)){
+		camera->cameraMovement(delta_Time,incomingEvent);
+		lightMovement(incomingEvent);
+	}
 
 }
-void Application::inputHandler(){
-	SDL_Event incomingEvent;
-		while( SDL_PollEvent( &incomingEvent)){
-			float cameraSpeed = 30.0f * delta_Time ;
-			switch(incomingEvent.type){
-			case SDL_QUIT:
-				return;
-				break;
-			case SDL_KEYDOWN:
-				switch( incomingEvent.key.keysym.sym ){
-					case SDLK_q:
-						if(leftShiftPressed){
-							lightPosition.z += 10.0f* delta_Time;
-						}
-						break;
-					case SDLK_e:
-						if(leftShiftPressed){
-							lightPosition.z -=10.0f* delta_Time;
-						}
-						break;
-					case SDLK_w:
-						if(leftShiftPressed){
-							lightPosition.y += 10.0f* delta_Time;
-						}
-						break;
-					case SDLK_a:
-						if(leftShiftPressed){
-							lightPosition.x -= 10.0f* delta_Time;
-						}
-						break;
-					case SDLK_s:
-						if(leftShiftPressed){
-							lightPosition.y -= 10.0f* delta_Time;
-						}
-						break;
-					case SDLK_d:
-						if(leftShiftPressed){
-							lightPosition.x += 10.0f* delta_Time;
-						}
-						break;
-					case SDLK_LSHIFT:
-						leftShiftPressed = true;
-						break;
+void Application::lightMovement(SDL_Event incomingEvent){
+	
+	switch(incomingEvent.type){
+	case SDL_QUIT:
+		return;
+		break;
+	case SDL_KEYDOWN:
+		switch( incomingEvent.key.keysym.sym ){
+			case SDLK_q:
+				if(leftShiftPressed){
+					lightPosition.z += 10.0f* delta_Time;
 				}
 				break;
-			case SDL_KEYUP:
-				switch(incomingEvent.key.keysym.sym){
-					case SDLK_LSHIFT:
-						leftShiftPressed = false;
-						break;
+			case SDLK_e:
+				if(leftShiftPressed){
+					lightPosition.z -=10.0f* delta_Time;
 				}
 				break;
-			case SDL_MOUSEBUTTONDOWN:
-				SDL_GetMouseState(&mouse_X, &mouse_Y);
+			case SDLK_w:
+				if(leftShiftPressed){
+					lightPosition.y += 10.0f* delta_Time;
+				}
 				break;
-			case SDL_MOUSEWHEEL:
+			case SDLK_a:
+				if(leftShiftPressed){
+					lightPosition.x -= 10.0f* delta_Time;
+				}
 				break;
-			}
+			case SDLK_s:
+				if(leftShiftPressed){
+					lightPosition.y -= 10.0f* delta_Time;
+				}
+				break;
+			case SDLK_d:
+				if(leftShiftPressed){
+					lightPosition.x += 10.0f* delta_Time;
+				}
+				break;
+			case SDLK_LSHIFT:
+				leftShiftPressed = true;
+				break;
 		}
+		break;
+	case SDL_KEYUP:
+		switch(incomingEvent.key.keysym.sym){
+			case SDLK_LSHIFT:
+				leftShiftPressed = false;
+				break;
+		}
+		break;
+	case SDL_MOUSEBUTTONDOWN:
+		SDL_GetMouseState(&mouse_X, &mouse_Y);
+		break;
+	case SDL_MOUSEWHEEL:
+		break;
+	}
+		
 }
 float Application::getDeltaTime(){
 	return delta_Time;

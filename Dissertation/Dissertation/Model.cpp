@@ -18,6 +18,7 @@ Model::Model(char *objectFP, char *fragShaderFP, char *vertShaderFP){
 	modelMatrix = glm::translate(glm::mat4(1.0f), position );
 	lightPos = glm::vec4(1.0f,1.0f,0.2f,1.0f);
 	enableUVupdate = false;
+	textureLoader = new TextureLoader();
 }
 
 
@@ -113,6 +114,7 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 		// Activate the VAO
 		glBindVertexArray( VAO );
 			//create a model matrix 3x3 for my normals.
+			textureLoader->enableTextures();
 			modelViewMatrix3x3 = glm::mat3(viewMatrix * modelMatrix);
 			//glEnable(GL_CULL_FACE);
 			glEnable(GL_BLEND);
@@ -135,7 +137,9 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
 	glUseProgram( 0 );
 }
-
+void Model::loadTexture(char * filepath){
+	textureLoader->loadTexture(filepath,program);
+}
 void Model::setPosition(glm::vec3 a){
 	position = a;
 }

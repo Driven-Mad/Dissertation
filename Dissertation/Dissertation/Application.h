@@ -33,7 +33,7 @@ public:
 	/// \brief updates application based on Delta Time
 	void update();
 	/// \brief input handler for the application
-	void inputHandler();
+	void lightMovement(SDL_Event incomingEvent);
 	/// \brief returns delta time of application
 	float getDeltaTime();
 	/// \brief returns screen width of application
@@ -53,7 +53,6 @@ private:
 	int winHeight; ///< window Height
 	float delta_Time; ///< Deltat time for frame rate.
 	Model *skyDome, *house, *plane, *shelter,*car, *light, *rain;
-	TextureLoader *textLoad, *textLoad2, *textLoad3,*textLoad4,*textLoad5, *textLoad6;
 	FrameBuffer *fBuffer;
 	glm::vec4 lightPosition;
 	bool leftShiftPressed;

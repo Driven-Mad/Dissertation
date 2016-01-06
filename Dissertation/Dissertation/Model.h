@@ -10,6 +10,7 @@
 #include "ObjectLoader.h"
 #include <vector>
 #include "ProgramLoader.h"
+#include "TextureLoader.h"
 #include <gtc\matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 class Model
@@ -44,6 +45,8 @@ public:
 	void setLightPosition(glm::vec4 a);
 	/// \brief gets Light position
 	glm::vec4 getLightPosition();
+
+	void loadTexture(char *filepath);
 	
 	void rotateY(float speed, float DT);
 	void updateUVS(float dt);
@@ -67,5 +70,6 @@ private:
 	glm::vec4 lightPos;
 	bool enableUVupdate;
 	GLuint UVBuffer;
+	TextureLoader *textureLoader;
 };
 #endif //!MODEL_H

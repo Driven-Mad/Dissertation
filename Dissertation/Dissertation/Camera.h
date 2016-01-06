@@ -12,7 +12,7 @@ public:
 	glm::mat4 getProjectionMatrix(){return projectionMatrix;};
 	glm::mat4 getViewMatrix(){return viewMatrix;};
 	glm::vec3 getCameraPosition(){return cameraPosition;};
-	void cameraMovement(float DT);
+	void cameraMovement(float DT,SDL_Event &incomingEvent);
 	void update(float DT);
 private:
 	glm::mat4 projectionMatrix, viewMatrix; 
@@ -20,5 +20,6 @@ private:
 	glm::vec3 cameraPosition, cameraFront, cameraUp;
 	bool leftAltPressed;
 	int mouse_X, mouse_Y; ///<Mouse Co-ordinates
+
 };
 
