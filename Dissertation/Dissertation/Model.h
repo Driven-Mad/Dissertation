@@ -27,7 +27,7 @@ public:
 	/// \brief intialises shaders
 	void initaliseShaders();
 	/// \brief updates the model
-	void update(float DT, glm::vec4 lightPosition);
+	void update(float DT);
 	/// \brief draws model given camera view and projection matrix
 	void draw(glm::mat4 viewMatrix, glm::mat4 projMatrix);
 	/// \brief sets position
@@ -40,11 +40,6 @@ public:
 	glm::vec3 getRotation();
 	/// \brief gets program used.
 	GLint getProgram();
-
-	/// \brief sets Light position
-	void setLightPosition(glm::vec4 a);
-	/// \brief gets Light position
-	glm::vec4 getLightPosition();
 
 	void loadTexture(char *filepath);
 	
@@ -67,7 +62,6 @@ private:
 	std::vector<glm::vec3> out_Normals;///< Normals produced from object loader
 	std::vector<glm::vec3> out_Tangents;///< Tangents produced from object loader
 	std::vector<glm::vec3> out_BiTangents;///< BiTangents produced from object loader
-	glm::vec4 lightPos;
 	bool enableUVupdate;
 	GLuint UVBuffer;
 	TextureLoader *textureLoader;

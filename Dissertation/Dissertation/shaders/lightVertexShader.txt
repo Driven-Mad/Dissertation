@@ -36,7 +36,6 @@ out vec2 UV;
 
 void main(){
 //switch everything to tangent space.
-vec4 eyeSpaceVertPos;
 vec3 vertexNormal_cameraspace = MV3x3 * normalize(vNormalIn);
 vec3 vertexTangent_cameraspace = MV3x3 * normalize(vTangentIn);
 vec3 vertexBitangent_cameraspace = MV3x3 * normalize(vBiTangentIn);

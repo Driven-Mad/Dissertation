@@ -10,6 +10,8 @@ Camera::Camera(float screen_h, float screen_w)
 	field_of_view = 45.0f;
 	leftAltPressed = false;
 	sensitivity = 0.2f;
+	velocity = glm::vec3(0.0f,0.0f,0.0f);
+	moveL=moveR=moveF= moveB=false;
 }
 
 
@@ -18,44 +20,65 @@ Camera::~Camera(void)
 }
 
 void Camera::update(float DT){
-	
 	projectionMatrix = glm::perspective(glm::radians(field_of_view),pers_val , 0.1f, 100.0f);
 	viewMatrix = glm::lookAt(cameraPosition,cameraPosition+cameraFront,cameraUp);
+	cameraSpeed = 2.0f *DT;
+	displacment = cameraOldPosition - cameraPosition;
+	velocity = displacment/DT;
+	//velocity = glm::vec3(0.0f,0.0f,0.0f);
+	
 	if(field_of_view <=1.0f){
 		field_of_view = 1.0f;
 	}
 	if(field_of_view >=45.0f){
 		field_of_view = 45.0f;
 	}
+	if(moveF){
+		cameraOldPosition = cameraPosition;
+		cameraPosition += cameraSpeed * cameraFront;
+	};
+	if(moveR){
+		cameraOldPosition = cameraPosition;
+		cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
+	};
+	if(moveL){
+		cameraOldPosition = cameraPosition;
+		cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
+					
+	};
+	if(moveB){
+		cameraOldPosition = cameraPosition;
+		cameraPosition -= cameraSpeed * cameraFront;
+	};
+	
 }
 
 void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
 	
-	float cameraSpeed = 30.0f * DT ;
 	switch(incomingEvent.type){
-	case SDL_QUIT:
-		return;
-		break;
 	case SDL_KEYDOWN:
 		switch( incomingEvent.key.keysym.sym ){
 			case SDLK_w:
 				if(leftAltPressed){
-					cameraPosition += cameraSpeed * cameraFront;
+					moveF = true;
+					
 				}
 				break;
 			case SDLK_a:
 				if(leftAltPressed){
-					cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
+					
+					moveL = true;
 				}
 				break;
 			case SDLK_s:
 				if(leftAltPressed){
-					cameraPosition -= cameraSpeed * cameraFront;
+					
+					moveB = true;
 				}
 				break;
 			case SDLK_d:
 				if(leftAltPressed){
-					cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp))*cameraSpeed;
+					moveR = true;
 				}
 				break;
 			case SDLK_LALT:
@@ -67,6 +90,18 @@ void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
 		switch(incomingEvent.key.keysym.sym){
 			case SDLK_LALT:
 				leftAltPressed = false;
+				break;
+			case SDLK_w:
+				moveF = false;
+				break;
+			case SDLK_a:
+				moveL = false;
+				break;
+			case SDLK_s:
+				moveB = false;
+				break;
+			case SDLK_d:
+				moveR = false;
 				break;
 		}
 		break;
@@ -100,10 +135,10 @@ void Camera::cameraMovement(float DT, SDL_Event &incomingEvent){
 		break;
 	case SDL_MOUSEWHEEL:
 		if(incomingEvent.wheel.y > 0){
-			field_of_view -= cameraSpeed;
+			field_of_view -= cameraSpeed *10.0f;
 		}
 		if(incomingEvent.wheel.y < 0){
-			field_of_view += cameraSpeed;
+			field_of_view += cameraSpeed *10.0f;
 		}
 		break;
 	}

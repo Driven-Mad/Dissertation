@@ -1,0 +1,86 @@
+#version 330 core
+
+//must be known before compile time.
+#define no_of_lights 1
+
+//uniform block coming from program
+layout (std140) uniform PointLights{
+	vec4 PLposition[no_of_lights];
+	vec4 PLambient[no_of_lights];
+	vec4 PLlightColour[no_of_lights];
+	float PLconstant[no_of_lights];
+	float PLliniear[no_of_lights];
+	float PLquadratic[no_of_lights];
+};
+
+layout (std140) uniform DirectionalLights{
+vec4 DLdirection;
+vec4 DLlightColour;
+vec4 DLambient;
+};
+//Light Direction for point light coming from the vertex shader
+in vec3 lightDirPLV[no_of_lights];
+
+in vec3 lightDirDLV;
+//Normal coming from the vertex shader
+in vec3 vNormalV;
+//halfvec coming from the vertex shader
+in vec3 halfVecPL[no_of_lights]; 
+in vec3 halfVecDL;
+//UV coming from the vertex shader
+in vec2 UV; 
+//positiong coming from vertex shader
+in vec4 vPositionV;
+
+
+
+//Shininess value
+uniform float shininess     = 0.5f;
+//Texture
+uniform sampler2D textSampler0; 
+//Texture Normal
+uniform sampler2D textSampler1;
+
+
+//out put the colour
+out vec4 colour;
+
+vec3 calculatePointLights(vec3 lightDirection, vec4 lightColour, float cons, float lin, float quad, vec3 halfvec, vec4 ambient, vec4 lightPosition);
+vec3 calculateDirectionalLight(vec4 lightColour,vec4 ambient ,vec3 lightDirection, vec3 halfvec);
+
+void main(){
+	vec3 result;
+	result = calculateDirectionalLight(DLlightColour,DLambient,lightDirDLV,halfVecDL);
+	
+		
+		for(int i = 0; i<no_of_lights; i++)
+			result+= calculatePointLights(lightDirPLV[i], PLlightColour[i],PLconstant[i],PLliniear[i],PLquadratic[i],halfVecPL[i],PLambient[i], PLposition[i]);
+	
+		
+		
+	colour = vec4(result.x,result.y,result.z, 1.0f);
+}
+vec3 calculateDirectionalLight(vec4 lightColour,vec4 ambient ,vec3 lightDirection, vec3 halfvec){
+	vec3 temp;
+	//Give me the normalised textures
+	vec3 TextureNormal = normalize(texture2D(textSampler1, UV).rgb*2.0 - 1.0);
+	vec3 diffuse = texture(textSampler0, UV).rgb * lightColour.xyz * max( dot( TextureNormal, lightDirection), 0);
+	vec3 specular = texture(textSampler0, UV ).rgb * lightColour.xyz  * dot( TextureNormal, lightDirection ) * max( dot( TextureNormal, halfvec ), 0) * shininess;
+	temp = diffuse + specular + ambient.xyz;
+	return temp;
+}
+vec3 calculatePointLights(vec3 lightDirection, vec4 lightColour, float cons, float lin, float quad, vec3 halfvec, vec4 ambient, vec4 lightPosition){
+	vec3 temp;
+	//Give me the normalised textures
+	vec3 TextureNormal = normalize(texture2D(textSampler1, UV).rgb*2.0 - 1.0);
+	vec3 diffuse = texture(textSampler0, UV).rgb * lightColour.xyz * max( dot( TextureNormal, lightDirection ), 0);
+	vec3 specular = texture(textSampler0, UV ).rgb * lightColour.xyz  * dot( TextureNormal, lightDirection ) * max( dot( TextureNormal, halfvec ), 0) * shininess;
+	float distance    = length(lightPosition - vPositionV);
+	float attenuation = 1.0f / (cons + lin * distance + quad * (distance * distance));  
+	
+	temp = diffuse + specular ;
+	temp *= attenuation;
+	//always add emissiveColour and ambientColour on either texture
+	temp += ambient.xyz;
+	return temp;
+}

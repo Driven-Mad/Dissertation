@@ -11,10 +11,14 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include "Model.h"
+#include "Rain.h"
 #include "TextureLoader.h"
 #include "FrameBuffer.h"
 #include "gtc/matrix_access.hpp"
 #include "Camera.h"
+#include <vector>
+#include <gtc/type_ptr.hpp>
+#include "Lights.h"
 class Application
 {
 public:
@@ -32,8 +36,6 @@ public:
 	void draw();
 	/// \brief updates application based on Delta Time
 	void update();
-	/// \brief input handler for the application
-	void lightMovement(SDL_Event incomingEvent);
 	/// \brief returns delta time of application
 	float getDeltaTime();
 	/// \brief returns screen width of application
@@ -51,12 +53,11 @@ private:
 	int winWidth; ///< window width
 	int winHeight; ///< window Height
 	float delta_Time; ///< Deltat time for frame rate.
-	Model *skyDome, *house, *plane, *shelter,*car, *light, *rain;
+	Model *skyDome, *house, *plane, *shelter,*car;
 	FrameBuffer *fBuffer;
-	glm::vec4 lightPosition;
-	bool leftShiftPressed;
 	Camera *camera;
 	bool exit;
-
+	Rain *rain;
+	Lights *lightHandler;
 };
 #endif; //!APPLICATION_H
