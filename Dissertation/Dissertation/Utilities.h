@@ -31,6 +31,8 @@ namespace util{
 	/// \returns float
 	float dotProduct(glm::vec3 a, glm::vec3 b);
 
+	glm::vec3 rotateZaxisByPoint(glm::vec3 origin, float Angle, glm::vec3 rotatePoint);
+
 	float randF(float lowerBound, float higherBound);
 }
 #endif ///!UTIL_H

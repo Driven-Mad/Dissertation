@@ -80,7 +80,7 @@ void Application::init(){
 	lightHandler= new Lights();
 
 	//POINT LIGHTS
-	lightHandler->newPointLight(glm::vec4(0.6f,6.0f,0.05f,1.0f),RADIUS13,glm::vec4(1,1,1,1),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(0.6f,6.0f,0.05f,1.0f),RADIUS7,glm::vec4(1,1,1,1),glm::vec4(0.1f,0.1f,0.2f,1.0f));
 	lightHandler->initPointLights();
 	lightHandler->bindUniformBlockPointLights(plane->getProgram());
 	lightHandler->bindUniformBlockPointLights(car->getProgram());
@@ -88,7 +88,7 @@ void Application::init(){
 	lightHandler->bindUniformBlockPointLights(shelter->getProgram());
 	lightHandler->bindDataPointLights();
 	//DIRECTIONAL LIGHT
-	lightHandler->newDirectionalLight(glm::vec4(-0.2f,-1.0f,-0.3f,1.0f), glm::vec4(0.3f,0.3f,0.3f,1.0f), glm::vec4(0.2f,0.2f,0.2f,1.0f));
+	lightHandler->newDirectionalLight(glm::vec4(-0.2f,-1.0f,-0.3f,1.0f), glm::vec4(0.3f,0.3f,0.3f,1.0f), glm::vec4(0.1f,0.1f,0.1f,1.0f));
 	lightHandler->initDirectionLights();
 	lightHandler->bindUniformBlockDirectionalLights(plane->getProgram());
 	lightHandler->bindUniformBlockDirectionalLights(car->getProgram());

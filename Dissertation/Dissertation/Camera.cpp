@@ -36,6 +36,7 @@ void Camera::update(float DT){
 	if(moveF){
 		cameraOldPosition = cameraPosition;
 		cameraPosition += cameraSpeed * cameraFront;
+		//printf("\n Position.x = %f, Position.y = %f, Position.z = %f", cameraPosition.x,cameraPosition.y, cameraPosition.z);
 	};
 	if(moveR){
 		cameraOldPosition = cameraPosition;

@@ -23,6 +23,15 @@ namespace util{
 			tangent = tang2;
 		}
 	}
+	glm::vec3 rotateZaxisByPoint(glm::vec3 origin, float Angle, glm::vec3 rotatePoint){
+		glm::vec3 t_vEnd;
+		float t_fTranslatedX = rotatePoint.x - origin.x;
+		float t_fTranslatedY = rotatePoint.y - origin.y;
+		t_vEnd.x =((t_fTranslatedX * cosf(Angle)) - (t_fTranslatedY * sinf(Angle))) + origin.x;
+		t_vEnd.y = ((t_fTranslatedX * sinf(Angle)) + (t_fTranslatedY * cosf(Angle))) + origin.y;
+		t_vEnd.z = rotatePoint.z;
+		return t_vEnd;
+	}
 
 	float randF(float lowerBound, float higherBound){
 		float t = lowerBound + static_cast <float> (rand())/(static_cast <float> (RAND_MAX/(higherBound-lowerBound)));
