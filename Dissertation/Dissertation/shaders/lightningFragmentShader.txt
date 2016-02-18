@@ -1,0 +1,30 @@
+#version 330 core
+
+//must be known before compile time.
+#define no_of_lights 1
+
+//uniform block coming from program
+layout (std140) uniform PointLights{
+	vec4 PLposition[no_of_lights];
+	vec4 PLambient[no_of_lights];
+	vec4 PLlightColour[no_of_lights];
+	float PLconstant[no_of_lights];
+	float PLliniear[no_of_lights];
+	float PLquadratic[no_of_lights];
+};
+
+layout (std140) uniform DirectionalLights{
+vec4 DLdirection;
+vec4 DLlightColour;
+vec4 DLambient;
+};
+
+out vec4 colour;
+
+
+void main(){
+
+		
+		
+	colour = vec4(0.0f,0.0f,0.0f, 1.0f);
+}

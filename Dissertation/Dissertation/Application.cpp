@@ -60,7 +60,8 @@ void Application::init(){
 	shelter = new Model("assets/Old_Shelter.obj","shaders/lightingFragmentShader.txt","shaders/lightingVertexShader.txt");
 	car = new Model("assets/pickup_truck.obj","shaders/lightingFragmentShader.txt","shaders/lightingVertexShader.txt");
 	rain = new Rain();
-	
+	lightning = new Lightning();
+	lightning->setLoaded(false);
 	skyDome->loadTexture("assets/Sky.bmp");
 	skyDome->loadTexture("assets/SkyNormal.bmp");
 	house->loadTexture("assets/houseA.bmp");
@@ -111,8 +112,8 @@ void Application::draw(){
 			skyDome->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			
+			//rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+			lightning->Draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			
 	//unbind here
 	fBuffer->unbind(winWidth,winHeight);
@@ -152,6 +153,16 @@ void Application::update(){
 		camera->cameraMovement(delta_Time,incomingEvent);
 		lightHandler->lightMovement(incomingEvent,delta_Time);
 		rain->rainInput(delta_Time,incomingEvent);
+		lightning->LightningInput(delta_Time,incomingEvent);
+		switch(incomingEvent.type){
+	case SDL_KEYDOWN:
+			switch( incomingEvent.key.keysym.sym ){
+				case SDLK_l:
+					lightning->Init();
+					break;
+			}
+			break;
+	}
 	}
 
 }

@@ -57,6 +57,9 @@
     <ClCompile Include="Lightning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LightningBranch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glew.h">
@@ -99,6 +102,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Lightning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightningBranch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

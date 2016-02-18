@@ -2,7 +2,7 @@
 
 #include "Utilities.h"
 
-
+#define PI 3.14159265
 namespace util{
 	void createTangents(glm::vec3 normal, glm::vec3 &tangent){
 		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -27,12 +27,22 @@ namespace util{
 		glm::vec3 t_vEnd;
 		float t_fTranslatedX = rotatePoint.x - origin.x;
 		float t_fTranslatedY = rotatePoint.y - origin.y;
-		t_vEnd.x =((t_fTranslatedX * cosf(Angle)) - (t_fTranslatedY * sinf(Angle))) + origin.x;
-		t_vEnd.y = ((t_fTranslatedX * sinf(Angle)) + (t_fTranslatedY * cosf(Angle))) + origin.y;
+		float temp_a =  Angle * PI /180.0f;
+		t_vEnd.x =((t_fTranslatedX * cosf(temp_a)) - (t_fTranslatedY * sinf(temp_a))) + origin.x;
+		t_vEnd.y = ((t_fTranslatedX * sinf(temp_a)) + (t_fTranslatedY * cosf(temp_a))) + origin.y;
 		t_vEnd.z = rotatePoint.z;
 		return t_vEnd;
 	}
-
+	glm::vec3 rotateXaxisByPoint(glm::vec3 origin, float Angle, glm::vec3 rotatePoint){
+		glm::vec3 t_vEnd;
+		float t_fTranslatedZ = rotatePoint.z - origin.z;
+		float t_fTranslatedY = rotatePoint.y - origin.y;
+		float temp_a =  Angle * PI /180.0f;
+		t_vEnd.x = rotatePoint.x;
+		t_vEnd.y = ((t_fTranslatedY * cosf(temp_a)) - (t_fTranslatedZ * sinf(temp_a))) + origin.y;
+		t_vEnd.z = ((t_fTranslatedY * sinf(temp_a)) + (t_fTranslatedZ * cosf(temp_a))) + origin.z;
+		return t_vEnd;
+	}
 	float randF(float lowerBound, float higherBound){
 		float t = lowerBound + static_cast <float> (rand())/(static_cast <float> (RAND_MAX/(higherBound-lowerBound)));
 		return t;

@@ -19,6 +19,7 @@
 #include <vector>
 #include <gtc/type_ptr.hpp>
 #include "Lights.h"
+#include "Lightning.h"
 class Application
 {
 public:
@@ -59,5 +60,6 @@ private:
 	bool exit;
 	Rain *rain;
 	Lights *lightHandler;
+	Lightning *lightning;
 };
 #endif; //!APPLICATION_H

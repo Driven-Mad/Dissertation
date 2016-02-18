@@ -1,0 +1,24 @@
+#version 330 core
+
+//Vertex position coming from the program
+layout(location = 0) in vec4 vPosition;
+
+
+//model matrix coming from the program
+uniform mat4 modelMat;
+//view matrix coming from the program
+uniform mat4 viewMat;
+//projection matrix coming from the program
+uniform mat4 projMat;
+//UP value
+uniform vec3 up = {0.0f,1.0f,0.0f};
+
+uniform vec4 lightPosition;
+
+
+
+void main(){
+
+gl_Position = projMat * viewMat * modelMat * vPosition;
+
+}
