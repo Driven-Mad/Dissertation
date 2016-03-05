@@ -78,10 +78,14 @@ void Application::init(){
 
 	camera = new Camera(winHeight,winWidth);
 
-	lightHandler= new Lights();
+	lightHandler = new Lights();
 
 	//POINT LIGHTS
-	lightHandler->newPointLight(glm::vec4(0.6f,6.0f,0.05f,1.0f),RADIUS7,glm::vec4(1,1,1,1),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(-8.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(4.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(12.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(8.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(-4.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
 	lightHandler->initPointLights();
 	lightHandler->bindUniformBlockPointLights(plane->getProgram());
 	lightHandler->bindUniformBlockPointLights(car->getProgram());
@@ -113,8 +117,8 @@ void Application::draw(){
 			plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
 			//rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			lightning->Draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			
+			lightning->DrawCore(camera->getViewMatrix(), camera->getProjectionMatrix());
+			lightning->DrawBranch(camera->getViewMatrix(), camera->getProjectionMatrix());
 	//unbind here
 	fBuffer->unbind(winWidth,winHeight);
 	//draw here
@@ -138,7 +142,7 @@ void Application::update(){
 	plane->update(delta_Time);
 	shelter->update(delta_Time);
 	car->update(delta_Time);
-	skyDome->rotateY(0.04,delta_Time);
+	skyDome->rotateY(0.04f,delta_Time);
 	rain->update(delta_Time,camera);
 	camera->update(delta_Time);
 	lightHandler->changePLPosition(0);

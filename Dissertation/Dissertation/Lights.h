@@ -47,7 +47,18 @@ private:
 	std::vector<PointLight> pointLights;
 	DirectionalLight directionalLight;
 	glm::vec3 lightModelPos;
+	glm::vec3 activeLightModelPos;
 	unsigned int offsetPL;
 	bool leftShiftPressed;
+
+	glm::vec4 positions	[5];
+	glm::vec4 ambient	[5];
+	glm::vec4 lightcolor[5];
+	float constant		[5];
+	float linear		[5];
+	float quadratic		[5];
+
+	int activeLight;
+	bool printed;
 };
 

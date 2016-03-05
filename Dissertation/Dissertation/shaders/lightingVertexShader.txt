@@ -21,7 +21,7 @@ uniform mat4 projMat;
 uniform mat3 MV3x3;
 
 
-#define no_of_lights 1
+#define no_of_lights 5
 //uniform block coming from program
 layout (std140) uniform PointLights{
 	vec4 PLposition[no_of_lights];

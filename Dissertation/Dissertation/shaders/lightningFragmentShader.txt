@@ -1,7 +1,7 @@
 #version 330 core
 
 //must be known before compile time.
-#define no_of_lights 1
+#define no_of_lights 5
 
 //uniform block coming from program
 layout (std140) uniform PointLights{
@@ -26,5 +26,5 @@ void main(){
 
 		
 		
-	colour = vec4(0.0f,0.0f,0.0f, 1.0f);
+	colour = vec4(0.85f,0.865f,0.88f, 1.0f);
 }
