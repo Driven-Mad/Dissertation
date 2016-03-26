@@ -129,9 +129,11 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 			// Must specify the type of geometry to draw and the number of vertices
 			glDrawArrays(GL_TRIANGLES, 0,numVerts);
 		// Unbind VAO
+			textureLoader->disableTextures();
 		glBindVertexArray( 0 );
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
 	glUseProgram( 0 );
+	
 }
 void Model::loadTexture(char * filepath){
 	textureLoader->loadTexture(filepath,program);
@@ -177,7 +179,7 @@ void Model::rotateY(float speed, float DT){
 
 
 void Model::updateUVS(float dt){
-	for(int x=0; x<out_UVs.size(); x++){
+	for(unsigned int x=0; x<out_UVs.size(); x++){
 		out_UVs[x].y -= 0.3f *dt;
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, UVBuffer);

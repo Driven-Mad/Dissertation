@@ -30,7 +30,9 @@ layout (std140) uniform PointLights{
 	float PLconstant[no_of_lights];
 	float PLliniear[no_of_lights];
 	float PLquadratic[no_of_lights];
+	bool PLactive[no_of_lights];
 };
+
 
 layout (std140) uniform DirectionalLights{
 vec4 DLdirection;
@@ -56,11 +58,11 @@ vec3 calculateLightDirectionForDirectionalLight(vec4 lightDirection, vec4 eyeSpa
 
 void main(){
 //switch everything to tangent space.
-vec3 vertexNormal_cameraspace = MV3x3 * normalize(vNormalIn);
+vec3 vertexNormal_cameraspace = MV3x3 * normalize(vNormalIn); //Convert from Model space to camera Space
 vec3 vertexTangent_cameraspace = MV3x3 * normalize(vTangentIn);
 vec3 vertexBitangent_cameraspace = MV3x3 * normalize(vBiTangentIn);
 
-mat3 TBN = transpose(mat3(vertexTangent_cameraspace,vertexBitangent_cameraspace,vertexNormal_cameraspace));
+mat3 TBN = transpose(mat3(vertexTangent_cameraspace,vertexBitangent_cameraspace,vertexNormal_cameraspace)); //Get the Tangent/Bitangent/Normal Matrix
 vNormalV = MV3x3 * vNormalIn;
 
 gl_Position = projMat * viewMat * modelMat * vPosition;
@@ -94,7 +96,7 @@ vec3 calculateLightDirectionForPointLights(vec4 LightPosition, vec4 eyeSpaceVert
 }
 
 vec3 calculateLightDirectionForDirectionalLight(vec4 lightDirection, vec4 eyeSpaceVertPosition,mat3 TBN){
-	vec4 eyeSpacelightDirection = viewMat * lightDirection;
-	vec3 dir = TBN * normalize(vec3(-eyeSpacelightDirection));
-	return dir;
+	vec3 eyeSpacelightDirection = MV3x3 * normalize(lightDirection.xyz);
+	vec3 dir = TBN * normalize(-eyeSpacelightDirection);
+	return normalize(dir);
 }

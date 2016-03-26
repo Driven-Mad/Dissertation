@@ -4,14 +4,16 @@
 #define no_of_lights 5
 
 //uniform block coming from program
-layout (std140) uniform PointLights{
-	vec4 PLposition[no_of_lights];
-	vec4 PLambient[no_of_lights];
-	vec4 PLlightColour[no_of_lights];
-	float PLconstant[no_of_lights];
-	float PLliniear[no_of_lights];
-	float PLquadratic[no_of_lights];
-};
+//layout (std140) uniform PointLights{
+//	vec4 PLposition[no_of_lights];
+//	vec4 PLambient[no_of_lights];
+//	vec4 PLlightColour[no_of_lights];
+//	float PLconstant[no_of_lights];
+//	float PLliniear[no_of_lights];
+//	float PLquadratic[no_of_lights];
+//	bool PLactive[no_of_lights];
+//};
+
 
 layout (std140) uniform DirectionalLights{
 vec4 DLdirection;
@@ -19,12 +21,17 @@ vec4 DLlightColour;
 vec4 DLambient;
 };
 
-out vec4 colour;
+layout (location = 0) out vec4 colour;
+layout (location = 1) out vec4 brightness;
 
 
 void main(){
 
-		
+
 		
 	colour = vec4(0.85f,0.865f,0.88f, 1.0f);
+	float tempBreach = dot(colour.xyz, vec3(0.2126,0.7152,0.0722));
+	if(tempBreach > 1.0){
+		brightness = vec4(colour.xyz,1.0);
+	}
 }

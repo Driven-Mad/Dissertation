@@ -33,15 +33,16 @@ uniform sampler2D textSampler2;
 
 
 //out put the colour
-out vec4 colour;
+layout (location = 0) out vec4 colour;
+layout (location = 1) out vec4 brightness;
 
 void main(){
 float offset = 10f;
 float offset2 = 15f;
 float offset3 = 35f;
 vec3 textureColour = texture2D(textSampler0,UV.xy * offset).xyz;
-vec3 textureColour2 = texture2D(textSampler0,UV.xy* offset2).xyz;
-vec3 textureColour3 = texture2D(textSampler0,UV.xy* offset3).xyz;
+vec3 textureColour2 = texture2D(textSampler1,UV.xy* offset2).xyz;
+vec3 textureColour3 = texture2D(textSampler2,UV.xy* offset3).xyz;
 float alpha,alpha2,alpha3;
 ///////////FIRST TEXTURE
 //alpha = textureColour.x;
@@ -74,6 +75,9 @@ alpha3 =  0.2f;;
 }
 vec4 temp_rain3 = vec4(textureColour3.x,textureColour3.y,textureColour3.z,alpha3);
 colour = temp_rain + temp_rain2 + temp_rain3;
-
+float tempBreach = dot(colour.xyz, vec3(0.2126,0.7152,0.0722));
+if(tempBreach > 1.0){
+	brightness = vec4(colour.xyz,1.0);
+}
 
 }

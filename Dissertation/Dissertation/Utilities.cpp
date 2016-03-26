@@ -33,6 +33,18 @@ namespace util{
 		t_vEnd.z = rotatePoint.z;
 		return t_vEnd;
 	}
+
+	glm::vec3 rotateYaxisByPoint(glm::vec3 origin, float Angle, glm::vec3 rotatePoint){
+		glm::vec3 t_vEnd;
+		float t_fTranslatedX = rotatePoint.x - origin.x;
+		float t_fTranslatedZ = rotatePoint.z - origin.z;
+		float temp_a =  Angle * PI /180.0f;
+		t_vEnd.x =((t_fTranslatedX * cosf(temp_a)) - (t_fTranslatedZ * sinf(temp_a))) + origin.y ;
+		t_vEnd.y =rotatePoint.y ;
+		t_vEnd.z = ((t_fTranslatedX * sinf(temp_a)) + (t_fTranslatedZ * cosf(temp_a))) + origin.z;
+		return t_vEnd;
+	}
+
 	glm::vec3 rotateXaxisByPoint(glm::vec3 origin, float Angle, glm::vec3 rotatePoint){
 		glm::vec3 t_vEnd;
 		float t_fTranslatedZ = rotatePoint.z - origin.z;

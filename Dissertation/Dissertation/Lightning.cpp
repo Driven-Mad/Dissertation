@@ -1,16 +1,18 @@
 #include "Lightning.h"
 
 
-Lightning::Lightning(void){
+Lightning::Lightning(void)
+{
 	//Random point between 16, 22, 16 && -16, 22, -16
-	startingPoint = glm::vec3(util::randF(-16.0f,16.0f),22.0f,util::randF(-16.0f,16.0f));
+	startingPoint = glm::vec3(util::randF(-26.0f,26.0f),30.0f,util::randF(-26.0f,26.0f));
 	position = glm::vec3(0.0f,0.0f,0.0f);
 	//is this the first branch of lightning
 	firstBranch = true;
+	//set all default values
 	VAOcore, VAObranch = 0;
-	lightningCounter = -1;
 	program = 0;
-	strikeBranchPercentage = 20;
+	predessingIndex = 0;
+	strikeBranchPercentage = 30;
 	shaderModelMatLocation = shaderViewMatLocation = shaderProjMatLocation = 0;
 	hitGround = false;
 	finishedBranches = false;
@@ -23,25 +25,26 @@ Lightning::Lightning(void){
 }
 
 
-Lightning::~Lightning(void){
+Lightning::~Lightning(void)
+{
 }
 
-void Lightning::Init(){
+void Lightning::Init()
+{
 	m_vCoreVerts.clear();
 	m_vBranchedVerts.clear();
 	lightningStrike.clear();
+	predessingIndex = 0;
 	//* Random point between 16, 22, 16 && -16, 22, -16
-	startingPoint = glm::vec3(util::randF(-16.0f,16.0f),22.0f,util::randF(-16.0f,16.0f));
+	startingPoint = glm::vec3(util::randF(-26.0f,26.0f),30.0f,util::randF(-26.0f,26.0f));
 	position = glm::vec3(0.0f,0.0f,0.0f);
 	//is this the first branch of lightning
 	firstBranch = true;
-	lightningCounter = -1;
-	strikeBranchPercentage = 20;
+	strikeBranchPercentage = 30;
 	hitGround = false;
 	finishedBranches = false;
 	Strike();
-
-
+	//resend the data for positions. 
 	glBindBuffer(GL_ARRAY_BUFFER, corePositionBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_vCoreVerts.size() * sizeof(glm::vec3), &m_vCoreVerts[0] ,GL_DYNAMIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0 );
@@ -54,7 +57,14 @@ void Lightning::Init(){
 	glEnableVertexAttribArray(0);
 	glBindVertexArray( 0 );
 }
-void Lightning::DrawCore(glm::mat4 viewMatrix, glm::mat4 projMatrix){
+
+void Lightning::Draw(glm::mat4 viewMatrix, glm::mat4 projMatrix)
+{
+	DrawCore(viewMatrix,projMatrix);
+	DrawBranch(viewMatrix,projMatrix);
+}
+void Lightning::DrawCore(glm::mat4 viewMatrix, glm::mat4 projMatrix)
+{
 		// Activate the shader program
 	glUseProgram( program );
 
@@ -81,7 +91,8 @@ void Lightning::DrawCore(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
 	glUseProgram( 0 );
 }
-void Lightning::DrawBranch(glm::mat4 viewMatrix, glm::mat4 projMatrix){
+void Lightning::DrawBranch(glm::mat4 viewMatrix, glm::mat4 projMatrix)
+{
 		// Activate the shader program
 	glUseProgram( program );
 
@@ -106,7 +117,9 @@ void Lightning::DrawBranch(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
 	glUseProgram( 0 );
 }
-void Lightning::initaliseVAO(){
+void Lightning::initaliseVAO()
+{
+	//Initalise all the VAOS
 	glGenVertexArrays( 1, &VAOcore );
 	glBindVertexArray(VAOcore);
 		corePositionBuffer = 0;
@@ -129,7 +142,8 @@ void Lightning::initaliseVAO(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray( 0 );
 }
-void Lightning::initaliseShaders(){
+void Lightning::initaliseShaders()
+{
 	ProgramLoader *pgLoad = new ProgramLoader();
 	//make a program for the specified frag and vertex shaders
 	pgLoad->loadProgram("shaders/lightningVertexShader.txt", "shaders/lightningFragmentShader.txt");
@@ -140,136 +154,210 @@ void Lightning::initaliseShaders(){
 	shaderProjMatLocation = glGetUniformLocation( program, "projMat" );
 }
 
-void Lightning::Strike(){
-
-	while(!hitGround){
-		if(!firstBranch){
+void Lightning::Strike()
+{
+	//While its not hit the ground
+	while(!hitGround)
+	{
+		//If not first branch(to save on the else statment)
+		if(!firstBranch)
+		{
+			//create branch from parent branch
 			glm::vec3 begin = lightningStrike[predessingIndex].getEnd();
-			newBranch(begin,strikeBranchPercentage, false,0);
-			
-		}else{
-			newBranch(startingPoint,strikeBranchPercentage , false,0);
-			firstBranch = false;
+			newBranch(begin,strikeBranchPercentage, false, 0);
+		}
+		else
+		{
+			//Create a brand new branch.
+			newBranch(startingPoint,strikeBranchPercentage , false, 0);
 			predessingIndex = 0;
+			firstBranch = false;
 		}
 		branchOff();
 	}
-	while(!finishedBranches){
+	//Finish branches until the amount of branches it has gets to 0 
+	while(!finishedBranches)
+	{
 		finishOffBranches();
+		branchOff();
 	}
+	
+	//Find the core branch to seperate from branch offs
 	FindCoreBranch();
-	numCoreVerts = m_vCoreVerts.size();
-	numBranchVerts = m_vBranchedVerts.size();
-	printf("\n No of verts would be: %i", numCoreVerts);
+	/*!DEBUG ONLY!*/
+	//for(int i = 0; i<m_vCoreVerts.size();i++){
+	//	printf("\n CORE BRANCH %i = X:%f, Y:%f, Z%f", i, m_vCoreVerts[i].x, m_vCoreVerts[i].y, m_vCoreVerts[i].z);
+	//}
+
 }
 
-void Lightning::FindCoreBranch(){
+void Lightning::FindCoreBranch()
+{
+	//Make sure the arrays are cleared
 	m_vCoreVerts.clear();
-	for(int i = lightningStrike.size(); i>= 0; i--)
+	m_vBranchedVerts.clear();
+	for(int i = 0; i < lightningStrike.size(); i++)
 	{
+		//If it isn't a branch  off add to core branch else add to branchoff verts.
 		if(lightningStrike[i].getIsBranchOff() == false)
 		{
 			m_vCoreVerts.push_back(lightningStrike[i].getBeginning());
 			m_vCoreVerts.push_back(lightningStrike[i].getEnd());
-			lightningStrike.erase(lightningStrike.begin() + i);
-		}else{
+		}
+		else
+		{
 			m_vBranchedVerts.push_back(lightningStrike[i].getBeginning());
 			m_vBranchedVerts.push_back(lightningStrike[i].getEnd());
 		}
 	}
+	//clear out the array to save memory.
 	lightningStrike.clear();
-
+	//Set sizes for drawing. 
+	numCoreVerts = m_vCoreVerts.size();
+	numBranchVerts = m_vBranchedVerts.size();
 }
+
 void Lightning::newBranch(glm::vec3 begin, int percentChance, bool isBranchOff,int amountOfBranches)
 {
+	//get branch length, add it to the up value, then rotate it between 90 and 270 degrees in either x or Z axis.
 	float len = BranchLength();
 	glm::vec3 en = begin + glm::vec3(0,len,0);
-	float Angle = util::randF(90.0f,180.0f);
+	float Angle;
 	int randVal = rand() % 2;
-	if(randVal == 0)
+	if(!isBranchOff){
+		Angle = util::randF(90.0f,270.0f);
+		if(randVal == 0)
+		{
+			en = util::rotateZaxisByPoint(begin,Angle,en);
+		}
+		else
+		{
+			en = util::rotateXaxisByPoint(begin,Angle,en);
+		}
+	}
+	else
 	{
-		en = util::rotateZaxisByPoint(begin,Angle,en);
-	} else
-	{
-		en = util::rotateXaxisByPoint(begin,Angle,en);
+		//en += lightningStrike[lightningStrike.size()].getDirection();
+		int randVal2 = rand() % 2;
+		//Angle = util::randF(90.0f,270.0f);
+		if(randVal2 == 1){
+			Angle = util::randF(90.0f,140.0f);
+		}else{
+			Angle = util::randF(220.0f,270.0f);
+		}
+		if(randVal == 0)
+		{
+			en = util::rotateZaxisByPoint(begin,Angle,en);
+		}
+		else
+		{
+			en = util::rotateXaxisByPoint(begin,Angle,en);
+		}
 	}
 	bool branchC = BranchChance(percentChance);
+
+	//Add our new branch. 
 	LightningBranch *t_bBranch = new LightningBranch(begin,en,len,branchC);
 	t_bBranch->setIsBranchOff(isBranchOff);
 	t_bBranch->setAmountOfBranches(amountOfBranches);
-	
-	lightningStrike.push_back(*t_bBranch);
+	t_bBranch->setAngle(Angle);
 	if(!isBranchOff)
 	{
-		predessingIndex = lightningStrike.size() -1;
-	}
-	if(en.y <= -2.0f)
+		predessingIndex = lightningStrike.size();
+	}/*else{
+		t_bBranch->setEnd(t_bBranch->getEnd() + lightningStrike[lightningStrike.size()].getDirection());
+	}*/
+	lightningStrike.push_back(*t_bBranch);
+	//if the end y is ground level then it's hit the ground. 
+	if(en.y <= 0.0f)
 	{
-		lightningCounter = lightningStrike.size() -1;
 		hitGround = true;
 	}
+	
 }
-void Lightning::branchOff(){
-	for(unsigned int i= 0; i<lightningStrike.size(); i++){
-		if(lightningStrike[i].getBranchChance() == true){
-			printf("\n lightning branches %i ", lightningStrike[i].getAmountOfBranches());
-			//if(lightningStrike[i].getAmountOfBranches() != 0){
-				int randVal = rand() % 2;
-				int temp = rand() % 5 + 5;
-				if(randVal == 0)
-				{
-					newBranch(lightningStrike[i].getEnd(),strikeBranchPercentage, true,temp);
-				}else
-				{
-					newBranch(lightningStrike[i].getBeginning(),strikeBranchPercentage,true,temp);
-				}
-				lightningStrike[i].setBranchChance(false);
+void Lightning::branchOff()
+{
+	//Check for any current branch offs, if so branch off them.
+	for(unsigned int i= 0; i<lightningStrike.size(); i++)
+	{
+		if(lightningStrike[i].getBranchChance() == true)
+		{
+			int randVal = rand() % 2;
+			int branchAmountSize = rand() % 5;
+			if(randVal == 0)
+			{
+				newBranch(lightningStrike[i].getEnd(),strikeBranchPercentage, true,branchAmountSize);
+			}else
+			{
+				newBranch(lightningStrike[i].getBeginning(),strikeBranchPercentage,true,branchAmountSize);
+			}
+			lightningStrike[i].setBranchChance(false);
 		}
-		
 	}
 }
 
 void Lightning::finishOffBranches()
 {
+	//finish off the branches as if continously branch off, it can go forever. 
 	for(unsigned int i= 0; i<lightningStrike.size(); i++)
 	{
 		if(lightningStrike[i].getAmountOfBranches() == 0){
 			finishedBranches = true;
-		}
-		if(lightningStrike[i].getIsBranchOff() == true && lightningStrike[i].getAmountOfBranches() > 0)
+		}else if(lightningStrike[i].getIsBranchOff() == true )
 		{
 			newBranch(lightningStrike[i].getEnd(),strikeBranchPercentage, true, lightningStrike[i].getAmountOfBranches() - 1);
 			lightningStrike[i].setAmountOfBranches(0);
 			finishedBranches = false;
-			
 		}
 	}
 }
-bool Lightning::BranchChance(int branchPercentageChance){
+bool Lightning::BranchChance(int branchPercentageChance)
+{
+	//get a branch change based out of 100
 	bool branchChance;
-	int t_iRandom = rand() % 100;
-	if(t_iRandom <= branchPercentageChance){
+	int t_iRandom = rand() % 100 + 1;
+	if(t_iRandom <= branchPercentageChance)
+	{
 		branchChance = true;
-	}else{
+	}
+	else
+	{
 		branchChance = false;
 	}
 	return branchChance;
 }
 
-float Lightning::BranchLength(){
+float Lightning::BranchLength()
+{
+	//returns a random length
 	float branchLength;
-	branchLength = util::randF(0.3f,1.0f);
+	branchLength = util::randF(0.5f,1.5f);
 	return branchLength;
 }
 
-void Lightning::LightningInput(float DT,SDL_Event &incomingEvent){
-	switch(incomingEvent.type){
+void Lightning::LightningInput(float DT,SDL_Event &incomingEvent)
+{
+	//Restart the current strike
+	switch(incomingEvent.type)
+	{
 	case SDL_KEYDOWN:
-		switch( incomingEvent.key.keysym.sym ){
+		switch( incomingEvent.key.keysym.sym )
+		{
 			case SDLK_l:
 				Init();
 				break;
 		}
 		break;
 	}
+}
+
+void  Lightning::get3MajorPoints(glm::vec4 &pointA, glm::vec4& pointB, glm::vec4 &pointC)
+{
+	//returns 3 major points in the array
+	int mid = m_vCoreVerts.size()/2;
+	int midBegin = mid - 30;
+	int midend = mid + 30;
+	pointA = glm::vec4(m_vCoreVerts[midBegin].x,m_vCoreVerts[midBegin].y,m_vCoreVerts[midBegin].z,1.0f);
+	pointB =  glm::vec4(m_vCoreVerts[mid].x,m_vCoreVerts[mid].y,m_vCoreVerts[mid].z,1.0f);
+	pointC =  glm::vec4(m_vCoreVerts[midend].x,m_vCoreVerts[midend].y,m_vCoreVerts[midend].z,1.0f);
 }

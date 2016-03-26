@@ -9,6 +9,8 @@ Application::Application(void)
 	winHeight = 1080;
 	lastTime = SDL_GetTicks();
 	exit = false;
+	bloom = false;
+	exposure = 0.4f;
 }
 
 
@@ -61,7 +63,6 @@ void Application::init(){
 	car = new Model("assets/pickup_truck.obj","shaders/lightingFragmentShader.txt","shaders/lightingVertexShader.txt");
 	rain = new Rain();
 	lightning = new Lightning();
-	lightning->setLoaded(false);
 	skyDome->loadTexture("assets/Sky.bmp");
 	skyDome->loadTexture("assets/SkyNormal.bmp");
 	house->loadTexture("assets/houseA.bmp");
@@ -72,20 +73,111 @@ void Application::init(){
 	shelter->loadTexture("assets/Metal line bump.bmp");
 	car->loadTexture("assets/pickup_blue.bmp");
 	car->loadTexture("assets/pickup_blue_n.bmp");
+	//bloomFBuffer = new FrameBuffer("shaders/BloomFragmentShader.txt", "shaders/BloomVertexShader.txt");
 
-	fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
-	fBuffer->init(winWidth,winHeight);
+
+	//NORMAL FB//////////////////////////////
+	ShaderBloomFinal = new ProgramLoader();
+	ShaderBloomFinal->loadProgram("shaders/BloomFinalVertexShader.txt", "shaders/BloomFinalFragmentShader.txt");
+	ShaderBlurFB = new ProgramLoader();
+	ShaderBlurFB->loadProgram("shaders/BlurVertexShader.txt", "shaders/BlurFragmentShader.txt");
+	//fBuffer = new FrameBuffer("shaders/frameBuffFragmentShader.txt", "shaders/frameBuffVertexShader.txt");
+	//fBuffer->init(winWidth,winHeight);
+	
+	//
+	glGenFramebuffers(1, &HDRFBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, HDRFBuffer);
+
+	glGenTextures(2, rendTexture);
+	for(GLuint i = 0; i < 2; i++){
+		glBindTexture(GL_TEXTURE_2D, rendTexture[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight,0, GL_RGB, GL_FLOAT,NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // We clamp to the edge as the blur filter would otherwise sample repeated texture values!
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0 + i,GL_TEXTURE_2D, rendTexture[i],0);
+	}
+
+	glGenRenderbuffers(1, &depthRenderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, winWidth, winHeight);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+
+	GLuint DrawBuffers[2] = {GL_COLOR_ATTACHMENT0,GL_COLOR_ATTACHMENT1};
+	glDrawBuffers(2, DrawBuffers);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+			std::cout << "Framebuffer not complete!" << std::endl;
+	}else{
+		std::cout << "\n Framebuffer complete!" << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER,0);
+
+
+	glUseProgram(ShaderBlurFB->getProgram());
+	glGenFramebuffers(2, PingPongFBuffer);
+	glGenTextures(2,PingPongRendTextures);
+
+	for (GLuint i = 0; i < 2; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, PingPongFBuffer[i]);
+		glBindTexture(GL_TEXTURE_2D, PingPongRendTextures[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, winWidth, winHeight, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // We clamp to the edge as the blur filter would otherwise sample repeated texture values!
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, PingPongRendTextures[i], 0);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+			std::cout << "Framebuffer not complete!" << std::endl;
+		}else{
+			std::cout << "Framebuffer complete!" << std::endl;
+		}
+	}
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
+	quadVAO = 0;
+
+	//glGenVertexArrays(1, &quad_VertexArrayID);
+	//glBindVertexArray(quad_VertexArrayID);
+	//GLfloat g_quad_vertex_buffer_data[] =
+	// {
+    //-1, -1,
+    //1, -1,
+    //-1, 1,
+    //1, 1,
+	// };
+	//glGenBuffers(1, &quad_vertexbuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+	//
+	//
+	//quad_programID = ShaderBloomFinal->getProgram();
+	//quad_attrib = glGetAttribLocation(quad_programID, "vs_position");
+	//
+	//glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+	//glEnableVertexAttribArray(quad_attrib);
+	//glVertexAttribPointer(quad_attrib, 2, GL_FLOAT, false, 0, 0);
+	//glBindVertexArray(0);
+
+	//!NORMAL FB//////////////////////////////
+	
+	
 
 	camera = new Camera(winHeight,winWidth);
+
+	lightningTimer = 10.0f;
 
 	lightHandler = new Lights();
 
 	//POINT LIGHTS
 	lightHandler->newPointLight(glm::vec4(-8.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
 	lightHandler->newPointLight(glm::vec4(4.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(12.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(8.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(-4.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(12.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(8.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(-4.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
 	lightHandler->initPointLights();
 	lightHandler->bindUniformBlockPointLights(plane->getProgram());
 	lightHandler->bindUniformBlockPointLights(car->getProgram());
@@ -108,34 +200,121 @@ bool Application::run(){
 	return exit;
 }
 void Application::draw(){
-	fBuffer->bind(winWidth,winHeight);
-			//bind 
-			lightHandler->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			car->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			house->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			skyDome->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			//rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-			lightning->DrawCore(camera->getViewMatrix(), camera->getProjectionMatrix());
-			lightning->DrawBranch(camera->getViewMatrix(), camera->getProjectionMatrix());
-	//unbind here
-	fBuffer->unbind(winWidth,winHeight);
-	//draw here
-	fBuffer->draw(0);
-	// cleanup here
-	fBuffer->cleanUp();
-	SDL_GL_SwapWindow( window );
-}
-void Application::update(){
+	glEnable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, HDRFBuffer);
 	
+	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, winWidth, winHeight);
+		//bind 
+		lightHandler->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		car->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		house->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		skyDome->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		plane->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		shelter->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		lightning->Draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+	//unbind here
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glDisable(GL_DEPTH_TEST);
+	//glDisable(GL_CULL_FACE);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	//glViewport(0,0,winWidth,winHeight);
+
+	glUseProgram(ShaderBlurFB->getProgram());
+	///Blur bright fragments with gausian blur
+	GLboolean horizontal = true, first_iteration = true;
+	GLuint amount = 10;
+	
+	for (GLuint i = 0; i < amount; i++)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, PingPongFBuffer[horizontal]); 
+		glUniform1i(glGetUniformLocation(ShaderBlurFB->getProgram(), "horizontal"), horizontal);
+		glUniform1i(glGetUniformLocation(ShaderBlurFB->getProgram(), "image"), 0);
+		glActiveTexture(GL_TEXTURE0);
+		glEnable(GL_TEXTURE_2D);
+		if( first_iteration )
+		{
+			glBindTexture(GL_TEXTURE_2D,rendTexture[1]);
+			std::cout<<"********************** rendTexture[1] = "<<rendTexture[1]<<std::endl;
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D,PingPongRendTextures[!horizontal]);
+		}
+		RenderQuad();
+		horizontal = !horizontal;
+	
+		if (first_iteration)
+			first_iteration = false;
+		
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glUseProgram(0);
+	//glDisable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D,0);
+	//glUseProgram(ShaderBlurFB->getProgram());
+	glUseProgram(ShaderBloomFinal->getProgram());
+
+	//glUniform1i(glGetUniformLocation(ShaderBloomFinal->getProgram(), "bloomBlur"),1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, rendTexture[0]);
+	GLuint TL = glGetUniformLocation(ShaderBloomFinal->getProgram(), "scene");
+	glUniform1i(TL, 0);
+	//GLint tL  = glGetUniformLocation( ShaderBloomFinal->getProgram(), "scene");
+	//glUniform1i(tL, 0);
+	//glUseProgram(ShaderBlurFB->getProgram());
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, PingPongRendTextures[!horizontal]);
+	TL = glGetUniformLocation(ShaderBloomFinal->getProgram(), "bloomBlur");
+	glUniform1i(TL, 1);
+	//tL  = glGetUniformLocation( ShaderBloomFinal->getProgram(), "bloomBlur");
+	//glUniform1i(tL,1);
+
+	glUniform1i(glGetUniformLocation(ShaderBloomFinal->getProgram(), "bloom"), bloom);
+	glUniform1f(glGetUniformLocation(ShaderBloomFinal->getProgram(), "exposure"), exposure);
+	RenderQuad();
+	////draw here
+	//glUseProgram(quad_programID);
+	//glBindVertexArray(quad_VertexArrayID);
+	//glEnableVertexAttribArray(quad_attrib);
+	//
+	//glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D, rendTexture[0]);
+	//glUniform1i(glGetUniformLocation(quad_programID, "input_texture"), 0);
+	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//// cleanup here
+	//glDisableVertexAttribArray(quad_attrib);
+	//glBindVertexArray(0);
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//
+	//glFinish();
+
+	SDL_GL_SwapWindow( window );
+	//glUseProgram(0);
+}
+void Application::update()
+{
 	current = SDL_GetTicks();
 	delta_Time = (float) (current - lastTime) / 1000.0f;
 	lastTime = current;
 	if( delta_Time < (1.0f/50.0f) ){
 			SDL_Delay((unsigned int) (((1.0f/50.0f) - delta_Time)*1000.0f) );
 	}
-	glClearColor(1.0f,0.5f,0.3f,0.0f);
+	//lightningTimer -= 10.0f * delta_Time;
+	//if(lightningTimer <= 0.0f)
+	//{
+	//	lightning->Init();
+	//	lightningTimer = util::randF(3.0f,10.0f);
+	//}
+	glClearColor(0.0f,0.0f,0.0f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	skyDome->update(delta_Time);
 	house->update(delta_Time);
@@ -145,28 +324,39 @@ void Application::update(){
 	skyDome->rotateY(0.04f,delta_Time);
 	rain->update(delta_Time,camera);
 	camera->update(delta_Time);
-	lightHandler->changePLPosition(0);
-	lightHandler->updatePLposition();
+	lightning->get3MajorPoints(lightningLightA,lightningLightB,lightningLightC);
+	lightHandler->changeSpecificLightPosition(2,lightningLightA);
+	lightHandler->changeSpecificLightPosition(3,lightningLightB);
+	lightHandler->changeSpecificLightPosition(4,lightningLightC);
 	lightHandler->update(delta_Time);
-
+	
 	SDL_Event incomingEvent;
-	while( SDL_PollEvent( &incomingEvent)){
-		if(incomingEvent.type == SDL_QUIT){
+	while( SDL_PollEvent( &incomingEvent))
+	{
+		if(incomingEvent.type == SDL_QUIT)
+		{
 			exit = true;
 		}
 		camera->cameraMovement(delta_Time,incomingEvent);
-		lightHandler->lightMovement(incomingEvent,delta_Time);
+		lightHandler->lightInput(incomingEvent,delta_Time);
 		rain->rainInput(delta_Time,incomingEvent);
 		lightning->LightningInput(delta_Time,incomingEvent);
-		switch(incomingEvent.type){
-	case SDL_KEYDOWN:
-			switch( incomingEvent.key.keysym.sym ){
-				case SDLK_l:
-					lightning->Init();
-					break;
+		if(incomingEvent.type ==SDL_KEYDOWN)
+		{
+			if(incomingEvent.key.keysym.sym == SDLK_b){
+				bloom = !bloom;
 			}
-			break;
-	}
+			
+			if(incomingEvent.key.keysym.sym == SDLK_r){
+				exposure += 0.1f;
+			}
+			
+			
+			if(incomingEvent.key.keysym.sym == SDLK_e){
+				exposure -= 0.1f;
+			}
+			
+		}
 	}
 
 }
@@ -179,4 +369,31 @@ int Application::getWidth(){
 }
 int Application::getHeight(){
 	return winHeight;
+}
+
+void Application::RenderQuad()
+{
+	if(quadVAO == 0){
+		GLfloat quadVertices[] = {
+			// Positions        // Texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// Setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	}
+	glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	
 }

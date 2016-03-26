@@ -44,6 +44,8 @@ public:
 	/// \brief returns screen height of application
 	int getHeight();
 
+
+	void RenderQuad();
 private:
 	SDL_Window *window; ///< Window for SDL
 	SDL_Renderer *renderer; ///< Renderer for SDL
@@ -54,12 +56,29 @@ private:
 	int winWidth; ///< window width
 	int winHeight; ///< window Height
 	float delta_Time; ///< Deltat time for frame rate.
+	
 	Model *skyDome, *house, *plane, *shelter,*car;
-	FrameBuffer *fBuffer;
+	//FrameBuffer *fBuffer, *bloomFBuffer;
 	Camera *camera;
 	bool exit;
 	Rain *rain;
 	Lights *lightHandler;
 	Lightning *lightning;
+	glm::vec4 lightningLightA,lightningLightB,lightningLightC;
+	float lightningTimer;
+
+	///FRAME BUFFERS
+	ProgramLoader *ShaderBlurFB,*ShaderBloomFinal;// *ShaderBloomFB;
+	GLuint HDRFBuffer, PingPongFBuffer[2]; ///< Storage for the framebuffer.
+	GLuint rendTexture[2], PingPongRendTextures[2]; ///< rendered texture output.
+	GLuint depthRenderBuffer; ///< Depth buffer
+	GLboolean bloom;
+	GLuint quad_VertexArrayID; ///< quad vertexarray ID
+	GLuint quad_vertexbuffer; ///< quad vertex buffer
+	GLuint quad_programID; ///< quad program ID
+	GLint quad_attrib;///< quad Attribute
+	GLuint quadVAO;
+	GLuint quadVBO;
+	GLfloat exposure;
 };
 #endif; //!APPLICATION_H

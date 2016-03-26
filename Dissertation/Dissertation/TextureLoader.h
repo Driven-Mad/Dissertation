@@ -30,6 +30,7 @@ public:
 	std::vector<GLuint> getTextures();
 
 	void enableTextures();
+	void disableTextures();
 private:
 	GLuint loadTEXT(char * filepath);
 	std::vector<GLuint> textures; ///<container for our textures.

@@ -75,3 +75,8 @@ void TextureLoader::enableTextures(){
 		glUniform1i(texturesLocation[i], i);
 	}
 }
+void TextureLoader::disableTextures(){
+
+	glDisable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,0);
+}
