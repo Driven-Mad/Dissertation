@@ -29,7 +29,9 @@ public:
 	/// \brief updates the model
 	void update(float DT);
 	/// \brief draws model given camera view and projection matrix
-	void draw(glm::mat4 viewMatrix, glm::mat4 projMatrix);
+	void draw(glm::mat4 viewMatrix, glm::mat4 projMatrix, glm::mat4 lightSpaceMatrix, glm::vec3 cameraPosition);
+
+	void drawDepth(glm::mat4 lightSpaceMatrix,bool cube);
 	/// \brief sets position
 	void setPosition(glm::vec3 a);
 	/// \brief sets rotation
@@ -47,12 +49,14 @@ public:
 	void updateUVS(float dt);
 	glm::mat4 getModelMatrix();
 	void setModelMatrix(glm::mat4 a);
+	void setDepthMap(GLuint dMap){ depthMap = dMap;}
+	void setCubeDepthMap(GLuint dMap){ cubeDepthMap = dMap;}
 private:
 	glm::vec3 position; ///< Position of model
 	glm::vec3 rotation; ///< Rotation of model
 	GLuint VAO; ///< vertex Array object for model in openGL
-	GLuint program;///< shader program
-	GLint shaderModelMatLocation, shaderViewMatLocation,shaderProjMatLocation, shader3X3Location,lightPositionLocation; ///<uniformlocations for matrix
+	GLuint program, depthProgram, PLdepthProgram;///< shader program
+	GLint shaderModelMatLocation, shaderViewMatLocation,shaderProjMatLocation, shader3X3Location, lightSpaceMatrixLocation, depthMapLocation, cubeDepthMapLocation; ///<uniformlocations for matrix
 	glm::mat4 modelMatrix; ///< model matrix
 	glm::mat3 modelViewMatrix3x3; ///<model matrix in a 3x3 needed for normals
 	unsigned int numVerts;///<number of verts in model
@@ -65,5 +69,6 @@ private:
 	bool enableUVupdate;
 	GLuint UVBuffer;
 	TextureLoader *textureLoader;
+	GLuint depthMap, cubeDepthMap;
 };
 #endif //!MODEL_H

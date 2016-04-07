@@ -98,13 +98,27 @@ void Model::initaliseShaders(){
 	shaderViewMatLocation = glGetUniformLocation( program, "viewMat" );
 	shaderProjMatLocation = glGetUniformLocation( program, "projMat" );
 	shader3X3Location = glGetUniformLocation(program, "MV3x3");
+
+	pgLoad = new ProgramLoader();
+	pgLoad->loadProgram("shaders/ShadowMapDepthVertexShader.txt","shaders/ShadowMapDepthFragmentShader.txt");
+	depthProgram = pgLoad->getProgram();
+	lightSpaceMatrixLocation = glGetUniformLocation(depthProgram, "lightSpaceMatrix");
+
+	//pgLoad = new ProgramLoader();
+	//pgLoad->loadProgram("shaders/pointShadowsDepthVertexShader.txt", "shaders/pointShadowsDepthFragmentShader.txt","shaders/pointShadowsDepthGeometryShader.txt");
+	//PLdepthProgram = pgLoad->getProgram();
+
 }
 
 void Model::update(float DT){
 	modelMatrix = glm::translate(glm::mat4(1.0f), position);
 }
 
-void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
+void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix, glm::mat4 lightSpaceMatrix, glm::vec3 cameraPosition){
+	
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	// Activate the shader program
 	glUseProgram( program );
 
@@ -113,16 +127,64 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 			//create a model matrix 3x3 for my normals.
 			textureLoader->enableTextures();
 			modelViewMatrix3x3 = glm::mat3(viewMatrix * modelMatrix);
-			//glEnable(GL_CULL_FACE);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			
 
 			glFrontFace(GL_CCW);
+			shaderModelMatLocation = glGetUniformLocation( program, "modelMat" );
 			// Send matrices to the shader as uniforms like this:
 			glUniformMatrix4fv(shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix) );
 			glUniformMatrix4fv(shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix) );
 			glUniformMatrix4fv(shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(projMatrix) );
 			glUniformMatrix3fv(shader3X3Location, 1, GL_FALSE, glm::value_ptr(modelViewMatrix3x3));
+			lightSpaceMatrixLocation = glGetUniformLocation(program, "lightSpaceMatrix");
+			glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix) );
+			depthMapLocation = glGetUniformLocation(program, "shadowMap");
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D,depthMap);
+			glUniform1i(depthMapLocation,3);
+			//cubeDepthMapLocation = glGetUniformLocation(program, "depthMap");
+			//glActiveTexture(GL_TEXTURE4);
+			//glBindTexture(GL_TEXTURE_CUBE_MAP,cubeDepthMap);
+			//glUniform1i(depthMapLocation,4);
+			// Tell OpenGL to draw it
+			// Must specify the type of geometry to draw and the number of vertices
+			glDrawArrays(GL_TRIANGLES, 0,numVerts);
+		// Unbind VAO
+			textureLoader->disableTextures();
+		glBindVertexArray( 0 );
+	glUseProgram( 0 );
+	
+}
+void Model::drawDepth(glm::mat4 lightSpaceMatrix, bool cube){
+	//glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// Activate the shader program
+	//glCullFace(GL_FRONT);
+	if(!cube){
+		glUseProgram( depthProgram );
+		shaderModelMatLocation = glGetUniformLocation( depthProgram, "modelMat" );
+		glUniformMatrix4fv(shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix) );
+		lightSpaceMatrixLocation = glGetUniformLocation(depthProgram, "lightSpaceMatrix");
+		glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix) );
+	}else{
+		glUseProgram(PLdepthProgram);
+		shaderModelMatLocation = glGetUniformLocation( PLdepthProgram, "modelMat" );
+		glUniformMatrix4fv(shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix) );
+		lightSpaceMatrixLocation = glGetUniformLocation(PLdepthProgram, "lightSpaceMatrix");
+		glUniformMatrix4fv(lightSpaceMatrixLocation, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix) );
+	}
+		
+		// Activate the VAO
+		glBindVertexArray( VAO );
+			//create a model matrix 3x3 for my normals.
+			textureLoader->enableTextures();
+			
+
+			//glFrontFace(GL_CCW);
+			// Send matrices to the shader as uniforms 
+			
+			
 			
 
 			// Tell OpenGL to draw it
@@ -133,7 +195,7 @@ void Model::draw(glm::mat4 viewMatrix, glm::mat4 projMatrix){
 		glBindVertexArray( 0 );
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
 	glUseProgram( 0 );
-	
+	//glCullFace(GL_BACK); 
 }
 void Model::loadTexture(char * filepath){
 	textureLoader->loadTexture(filepath,program);

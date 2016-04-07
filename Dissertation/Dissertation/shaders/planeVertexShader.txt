@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 //Vertex position coming from the program
 layout(location = 0) in vec4 vPosition;
@@ -19,7 +19,7 @@ uniform mat4 viewMat;
 uniform mat4 projMat;
 //model 3X3 matrix coming from the program
 uniform mat3 MV3x3;
-
+uniform mat4 lightSpaceMatrix;
 
 #define no_of_lights 5
 //uniform block coming from program
@@ -31,6 +31,7 @@ layout (std140) uniform PointLights{
 	float PLliniear[no_of_lights];
 	float PLquadratic[no_of_lights];
 	bool PLactive[no_of_lights];
+	mat4 PLShadowProjection[6][no_of_lights];
 };
 
 layout (std140) uniform DirectionalLights{
@@ -50,7 +51,7 @@ out vec3 halfVecDL;
 out vec2 UV;
 //outputs the the fragment shader, the position
 out vec4 vPositionV;
-
+out vec4 FragPositionLightSpace;
 
 vec3 calculateLightDirectionForPointLights(vec4 LightPosition, vec4 eyeSpaceVertPosition,mat3 TBN);
 vec3 calculateLightDirectionForDirectionalLight(vec4 lightDirection, vec4 eyeSpaceVertPosition,mat3 TBN);
@@ -82,6 +83,9 @@ halfVecPL[i] = normalize( normalize(eyeDir) + normalize(lightDirPLV[i]));
 
 halfVecDL = normalize( normalize(eyeDir) + normalize(lightDirDLV));
 
+//FragPositionLightSpace = lightSpaceMatrix * vec4(  TBN * normalize(vec3(MV3x3 * eyeSpaceVertPos.xyz)),1.0);
+//FragPositionLightSpace = lightSpaceMatrix * vec4(  TBN * (vec3(MV3x3 * eyeSpaceVertPos.xyz)),1.0);
+FragPositionLightSpace = lightSpaceMatrix * vec4(modelMat * vPosition);
 
 vPositionV = vPosition;
 UV = vUVIn*50 ;
@@ -89,7 +93,7 @@ UV = vUVIn*50 ;
 
 
 vec3 calculateLightDirectionForPointLights(vec4 LightPosition, vec4 eyeSpaceVertPosition, mat3 TBN){
-	vec4 eyeSpacelightPosition = viewMat * LightPosition;
+	vec3 eyeSpacelightPosition = MV3x3 * normalize(LightPosition.xyz);
 	vec3 dir = TBN * normalize( vec3(eyeSpacelightPosition) - vec3(eyeSpaceVertPosition) );
 	return dir;
 }

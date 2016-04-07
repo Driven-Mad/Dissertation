@@ -27,6 +27,7 @@ public:
 		float PLliniear;
 		float PLquadratic;
 		bool PLactive;
+		glm::mat4 ShadowTransforms[6];
 	};
 
 	///STRUCTURE for DIRECTIONAL LIGHT 
@@ -75,6 +76,8 @@ public:
 	///\brief Returns the points lights. 
 	std::vector<PointLight> getPointLights(){return pointLights;};
 
+	glm::mat4 getLightSpaceMatrix(){return DLlightSpaceMatrix;};
+
 	///\brief Toggle the which is the currently active light. 
 	void toggleActive();
 
@@ -90,11 +93,14 @@ private:
 	std::vector<PointLight> pointLights; ///<Storage container for all of the point lights in our scene
 	DirectionalLight directionalLight; ///<Storage for our directional light values
 	glm::vec3 activeLightModelPos; ///<Get and update the current active light model position to be assigned to the active light.
-	unsigned int offsetPL, booloffsetsPL; ///<Data offset
+	unsigned int offsetPL, booloffsetsPL, shadowOffSetsPL; ///<Data offset
 	bool leftShiftPressed; ///< boolean if the Left shift is pressed or not.
 	std::vector<Model*> PointLightsModels; ///<Storage for our light model representation
 	int size;/// <variable to store the size that the UNIFORM BUFFER OBJECT needs
-	unsigned int activeLight; ///<Index for which the current active light the user has selected. 
+	unsigned int activeLight; ///<Index for which the current active light the user has selected.
+
+	glm::mat4 DLlightProjection, DLlightView, DLlightSpaceMatrix;
+	glm::mat4 PLShadowProjection;
 };
 
 #endif //!LIGHTS_H

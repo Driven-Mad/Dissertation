@@ -23,7 +23,7 @@ void ProgramLoader::loadVShader(char *filepath){
 	}
 	// Create the vertex shader
 	vShader = glCreateShader( GL_VERTEX_SHADER );
-	//find the size o	f the Vdata
+	//find the size of the Vdata
 	int length = Vdata.length();
 	//get our shader
 	const GLchar* vStr = Vdata.c_str();
@@ -41,6 +41,43 @@ void ProgramLoader::loadVShader(char *filepath){
 	}
 	// This links the shader to the program
 	glAttachShader( program, vShader );
+	// This makes sure the vertex and fragment shaders connect together
+	glLinkProgram( program );
+}
+
+void ProgramLoader::loadGShader(char *filepath){
+	//reads in the file into a buffer
+	std::ifstream t(filepath);
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	Gdata = buffer.str();
+	if(Gdata.size() == NULL){
+		std::ofstream newFile;
+		newFile.open(filepath);
+		newFile <<"#version 330\n }";
+		newFile.close();
+		printf("\n NEW FILE WAS CREATED: %s", filepath);
+	}
+	// Create the vertex shader
+	gShader = glCreateShader( GL_GEOMETRY_SHADER );
+	//find the size of the Vdata
+	int length = Gdata.length();
+	//get our shader
+	const GLchar* gStr = Gdata.c_str();
+	// Give GL the source for it
+	glShaderSource( gShader, 1, &gStr, NULL );
+	// Compile the shader
+	glCompileShader( gShader );
+	// Check it compiled and give useful output if it didn't work!
+	if( CheckShaderCompiled( gShader ) ){
+		printf("\n %s successfully compiled", filepath);
+	}
+	else{
+		printf("\n %s failed to compiled", filepath);
+		return;
+	}
+	// This links the shader to the program
+	glAttachShader( program, gShader );
 	// This makes sure the vertex and fragment shaders connect together
 	glLinkProgram( program );
 }
@@ -102,6 +139,30 @@ void ProgramLoader::loadProgram(char *vShaderFP, char *fShaderFP){
 	loadVShader(vShaderFP);
 	//loads the fragent shader
 	loadFShader(fShaderFP);
+	// Check this worked
+	GLint linked;
+	glGetProgramiv(program, GL_LINK_STATUS, &linked );
+	if ( linked ){
+		printf("\n Program successfully linked");		
+	}
+	else{
+		GLsizei len;
+		glGetProgramiv( program, GL_INFO_LOG_LENGTH, &len );
+		GLchar* log = new GLchar[len+1];
+		glGetProgramInfoLog( program, len, &len, log );
+		std::cerr << "ERROR: Shader linking failed: " << log << std::endl;
+		delete [] log;
+		return;
+	}
+}
+
+void ProgramLoader::loadProgram(char *vShaderFP, char *fShaderFP, char *gShaderFP){
+	//loads the vertex shader
+	loadVShader(vShaderFP);
+	//loads the fragent shader
+	loadFShader(fShaderFP);
+	//loads the fragent shader
+	loadGShader(gShaderFP);
 	// Check this worked
 	GLint linked;
 	glGetProgramiv(program, GL_LINK_STATUS, &linked );

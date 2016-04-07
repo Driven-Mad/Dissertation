@@ -6,6 +6,7 @@ Lights::Lights(void)
 	offsetPL = 0;
 	leftShiftPressed = false;
 	activeLight = -1;
+	PLShadowProjection = glm::perspective(90.0f,1.0f,1.0f,25.0f);
 }
 
 Lights::~Lights(void)
@@ -56,13 +57,19 @@ void Lights::newPointLight(glm::vec4 position, Radius Radius, glm::vec4 lightCol
 			pl.PLquadratic = 1.8f;
 			break;
 	}
+	pl.ShadowTransforms[0] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(1.0f,0.0f,0.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+	pl.ShadowTransforms[1] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
+	pl.ShadowTransforms[2] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(0.0f,1.0f,0.0f) ,glm::vec3(0.0f, 0.0f, 1.0f)));
+	pl.ShadowTransforms[3] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 0.0f,-1.0f)));
+	pl.ShadowTransforms[4] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(0.0f,0.0f,1.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+	pl.ShadowTransforms[5] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
 	pointLights.push_back(pl);
 	//Create  anew model to represent our light.
 	Model* t = new Model("assets/light.obj","shaders/lightFragmentShader.txt","shaders/lightVertexShader.txt");
 	PointLightsModels.push_back(t);
 
 	//The size of the memory required for point lights block (7 * 16 offsets)
-	size = (7 * sizeof(glm::vec4) )* pointLights.size();
+	size = ((7 * sizeof(glm::vec4)) +(4 * sizeof(glm::vec4) * 6 ))* pointLights.size();
 }
 
 void Lights::draw(glm::mat4 viewMat, glm::mat4 projMat)
@@ -72,7 +79,7 @@ void Lights::draw(glm::mat4 viewMat, glm::mat4 projMat)
 		if(pointLights[i].PLactive)
 		{
 			//If the light is active, draw the model to represent it. 
-			PointLightsModels[i]->draw(viewMat, projMat);
+			PointLightsModels[i]->draw(viewMat, projMat, glm::mat4(0.0f),glm::vec3(0.0f));
 		}
 	}
 }
@@ -113,6 +120,39 @@ void Lights::update(float dt)
 		offsetPL += sizeof(glm::vec4);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
+	offsetPL= shadowOffSetsPL;
+	for(unsigned int x = 0; x<pointLights.size(); x++)
+	{
+		pointLights[x].ShadowTransforms[0] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(1.0f,0.0f,0.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+		pointLights[x].ShadowTransforms[1] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
+		pointLights[x].ShadowTransforms[2] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,1.0f,0.0f) ,glm::vec3(0.0f, 0.0f, 1.0f)));
+		pointLights[x].ShadowTransforms[3] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 0.0f,-1.0f)));
+		pointLights[x].ShadowTransforms[4] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,1.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+		pointLights[x].ShadowTransforms[5] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[0]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[1]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[2]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[3]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[4]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[5]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		
+	}
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	//for(unsigned int x = 0; x<pointLights.size(); x++)
+	//{
+	//	//send if the lights are active or not to the shaders.
+	//	
+	//	glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::mat4) *6, &pointLights[x].ShadowTransforms);
+	//	offsetPL += (sizeof(glm::vec4)*4) *6;
+	//	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	//}
 }
 
 void Lights::toggleActive()
@@ -131,70 +171,81 @@ void Lights::initPointLights(){
 
 	glBindBufferRange(GL_UNIFORM_BUFFER,0,uniformBlockPLs,0, size);
 }
+
 void Lights::bindUniformBlockPointLights(GLuint program){
 	//Bind the buffer to an index. 
 	GLuint uniformBlockIndex = glGetUniformBlockIndex(program,"PointLights");
 	glUniformBlockBinding(program,uniformBlockIndex,0);
 }
+
 void Lights::bindDataPointLights(){
 	// bind the data to it's correct place and send to the shaders.
 	//POSITIONS
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
+		
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(glm::vec4) , glm::value_ptr(pointLights[x].PLposition));
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		
 	}
 	//AMBIENTS
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(glm::vec4) , glm::value_ptr(pointLights[x].PLambient));
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	//LIGHT COLOURS
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(glm::vec4) , glm::value_ptr(pointLights[x].PLlightColour));
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	//CONSTANTS
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(float) , &pointLights[x].PLconstant);
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	//LINIEAR
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(float) , &pointLights[x].PLliniear);
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	//QUADRATICS
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(float) , &pointLights[x].PLquadratic);
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 	booloffsetsPL = offsetPL; //Get the bool offset as this is the only one other than position that is being sent constantly
 	//ACTIVE OR !ACTIVE
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(bool) , &pointLights[x].PLactive);
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
+
+	
+	shadowOffSetsPL = offsetPL;
+	for(unsigned int x = 0; x<pointLights.size(); x++)
+	{
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[0]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[1]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[2]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[3]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[4]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[5]);
+		offsetPL += (sizeof(glm::vec4)*4);
+		
+	}
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Lights::changeSpecificLightPosition(int lightID, glm::vec4 newPosition)
@@ -305,6 +356,9 @@ void Lights::newDirectionalLight(glm::vec4 direction, glm::vec4 lightColour, glm
 	directionalLight.direction = direction;
 	directionalLight.lightColour = lightColour;
 	directionalLight.ambient = ambientColour;
+	DLlightProjection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,-10.0f,17.5f);
+	DLlightView = glm::lookAt(glm::vec3(direction),glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
+	DLlightSpaceMatrix = DLlightProjection * DLlightView;
 }
 
 

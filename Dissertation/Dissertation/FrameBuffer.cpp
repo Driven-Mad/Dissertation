@@ -27,7 +27,7 @@ void FrameBuffer::init(int winWidth,int winHeight){
 	glGenTextures(2, rendTexture);
 	for(GLuint i = 0; i<2; i++){
 		glBindTexture(GL_TEXTURE_2D, rendTexture[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight,0, GL_RGBA, GL_FLOAT,NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, winWidth, winHeight,0, GL_RGBA, GL_FLOAT,NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0 + i,rendTexture[i],0);
@@ -72,7 +72,7 @@ void FrameBuffer::initBlur(int winWidth,int winHeight){
 	for(GLuint i = 0; i<2; i++){
 		glBindFramebuffer(GL_FRAMEBUFFER, FBuffer[i]);
 		glBindTexture(GL_TEXTURE_2D, rendTexture[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, winWidth, winHeight,0, GL_RGBA, GL_FLOAT,NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, winWidth, winHeight,0, GL_RGBA, GL_FLOAT,NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glFramebufferTexture(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0 ,rendTexture[i],0);

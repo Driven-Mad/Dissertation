@@ -1,0 +1,36 @@
+#version 430 core
+
+layout (triangles) in;
+layout (triangle_strip, max_vertices=18) out;
+#define no_of_lights 5
+
+//uniform block coming from program
+layout (std140) uniform PointLights{
+	vec4 PLposition[no_of_lights];
+	vec4 PLambient[no_of_lights];
+	vec4 PLlightColour[no_of_lights];
+	float PLconstant[no_of_lights];
+	float PLliniear[no_of_lights];
+	float PLquadratic[no_of_lights];
+	bool PLactive[no_of_lights];
+	mat4 PLShadowProjection[6][no_of_lights];
+};
+
+out vec4 fragPos;
+
+uniform int lightID;
+
+void main()
+{
+	for(int face = 0; face < 6; ++face)
+    {
+        gl_Layer = face; 
+        for(int i = 0; i < 3; ++i) 
+        {
+            fragPos = gl_in[i].gl_Position;
+            gl_Position = PLShadowProjection[face][0] * fragPos;
+            EmitVertex();
+        }    
+        EndPrimitive();
+    }
+}

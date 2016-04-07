@@ -68,9 +68,9 @@ private:
 	float lightningTimer;
 
 	///FRAME BUFFERS
-	ProgramLoader *ShaderBlurFB,*ShaderBloomFinal;// *ShaderBloomFB;
-	GLuint HDRFBuffer, PingPongFBuffer[2]; ///< Storage for the framebuffer.
-	GLuint rendTexture[2], PingPongRendTextures[2]; ///< rendered texture output.
+	ProgramLoader *ShaderBlurFB,*ShaderBloomFinal, *PLCubePointLights;// *ShaderBloomFB;
+	GLuint HDRFBuffer, PingPongFBuffer[2], depthMapFbuffer, cubeMapFrameBuffer[5]; ///< Storage for the framebuffer.
+	GLuint rendTexture[2], PingPongRendTextures[2], depthMap,depthCubeMap[5]; ///< rendered texture output.
 	GLuint depthRenderBuffer; ///< Depth buffer
 	GLboolean bloom;
 	GLuint quad_VertexArrayID; ///< quad vertexarray ID

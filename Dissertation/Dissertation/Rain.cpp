@@ -17,7 +17,7 @@ Rain::~Rain(void)
 {
 }
 void Rain::draw(glm::mat4 viewMat, glm::mat4 projMat){
-	doubleEndedCone->draw(viewMat, projMat);
+	doubleEndedCone->draw(viewMat, projMat, glm::mat4(0.0f),glm::vec3(0.0f));
 }
 void Rain::update(float DT,Camera* c){
 	doubleEndedCone->setPosition(c->getCameraPosition());

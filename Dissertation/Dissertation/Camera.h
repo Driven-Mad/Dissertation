@@ -9,6 +9,7 @@ class Camera
 public:
 	Camera(float screen_h, float screen_w);
 	~Camera(void);
+
 	glm::mat4 getProjectionMatrix(){return projectionMatrix;};
 	glm::mat4 getViewMatrix(){return viewMatrix;};
 	glm::vec3 getCameraPosition(){return cameraPosition;};
@@ -17,6 +18,7 @@ public:
 	glm::vec3 getCameraDirection(){return displacment;};
 	void cameraMovement(float DT,SDL_Event &incomingEvent);
 	void update(float DT);
+
 private:
 	glm::mat4 projectionMatrix, viewMatrix; 
 	float pers_val,field_of_view;

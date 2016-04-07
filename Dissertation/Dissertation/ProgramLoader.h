@@ -23,8 +23,12 @@ public:
 	void loadVShader(char *filepath);
 	/// \brief loads fragment Shader, taking in filepath
 	void loadFShader(char *filepath);
+	/// \brief loads Geometry Shader, taking in filepath
+	void loadGShader(char *filepath);
 	/// \brief loads program, taking in vertex shader and Fragment shader filepaths.
 	void loadProgram(char *vShaderFP, char *fShaderFP);
+	/// \brief loads program, taking in vertex shader and Fragment shader filepaths.
+	void loadProgram(char *vShaderFP, char *fShaderFP, char *gShaderFP);
 	/// \brief error checking to see if the shader compiled ok
 	bool CheckShaderCompiled( GLint shader );
 	/// \brief gets the program
@@ -32,9 +36,9 @@ public:
 	GLint getProgram();
 
 private:
-	std::string Vdata, Fdata; ///<storage for the shader
+	std::string Vdata, Fdata, Gdata; ///<storage for the shader
 	GLuint program; ///<the actual program
-	GLuint vShader, fShader; ///<the shader
+	GLuint vShader, fShader,gShader; ///<the shader
 };
 
 #endif ///!PROGRAMLOADER_H
