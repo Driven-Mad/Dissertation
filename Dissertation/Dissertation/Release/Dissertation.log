@@ -1,5 +1,35 @@
-﻿Build started 07/04/2016 13:22:08.
+﻿Build started 01/05/2016 15:45:31.
+     1>Project "E:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /I..\glm /I"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\include" /I"..\SDL\SDL2_image-2.0.0\include" /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D GLEW_STATIC /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt Application.cpp
+         Application.cpp
+     1>Application.cpp(16): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>Application.cpp(228): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>Application.cpp(568): warning C4244: '-=' : conversion from 'float' to 'int', possible loss of data
+     1>Application.cpp(569): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>Application.cpp(574): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>Application.cpp(575): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"..\SDL\SDL2-devel-2.0.3-VC\SDL2-2.0.3\lib\x86" /LIBPATH:"..\SDL\SDL2_image-2.0.0\lib\x86" SDL2.lib SDL2main.lib OpenGL32.lib SDL2_image.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.lib" /MACHINE:X86 /SAFESEH Release\Application.obj
+         Release\Camera.obj
+         Release\FrameBuffer.obj
+         Release\glew.obj
+         Release\Lightning.obj
+         Release\LightningBranch.obj
+         Release\Lights.obj
+         Release\Main.obj
+         Release\Model.obj
+         Release\ObjectLoader.obj
+         Release\Partical_System.obj
+         Release\ProgramLoader.obj
+         Release\Rain.obj
+         Release\TextureLoader.obj
+         Release\Utilities.obj
+         Generating code
+         Finished generating code
+         Dissertation.vcxproj -> E:\University Work\Year_3\Individual Project\Project\Dissertation\Release\Dissertation.exe
+     1>Done Building Project "E:\University Work\Year_3\Individual Project\Project\Dissertation\Dissertation\Dissertation.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.11
+Time Elapsed 00:00:07.71

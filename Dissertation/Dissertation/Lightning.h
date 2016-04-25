@@ -54,6 +54,11 @@ public:
 	void FindCoreBranch();
 	///\brief finds 3 major points within the lightning to find the best place to put the spot lights
 	void get3MajorPoints(glm::vec4 &pointA, glm::vec4& pointB, glm::vec4 &pointC);
+
+	int getBranchesToDraw(){return branchesToDraw;};
+	int getCoreToDraw(){return coreToDraw;};
+	int getCoreBranchSize(){return m_vCoreVerts.size();};
+	int getBranchSize(){return m_vBranchedVerts.size();};
 private:
 	///\brief draw the core branch as a thicker line than the rest
 	void DrawCore(glm::mat4 viewMatrix, glm::mat4 projMatrix);
@@ -77,6 +82,12 @@ private:
 	bool hitGround;///<Bool to check if the strike has hit the ground
 	int lightningCounter; ///<Counter to go into Storm Functoion !*NOT YET IMPLEMENTED*!
 	bool finishedBranches; ///<Check if we've finished off finishing off the branches
+
+	int coreToDraw;
+	int branchesToDraw;
+	int branchedStart;
+	bool drawBranch;
+
 };
 
 #endif

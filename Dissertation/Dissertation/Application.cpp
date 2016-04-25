@@ -11,6 +11,13 @@ Application::Application(void)
 	exit = false;
 	bloom = false;
 	exposure = 0.4f;
+	shadowRendered = false;
+	rainAndLightningOn = true;
+	timerStorm = rand() % 20 + 2;
+	timerFlash = 10.0f;
+	flashCount = 5;
+	flashed= false;
+	finishedForking = true;
 }
 
 
@@ -136,7 +143,7 @@ void Application::init(){
 			std::cout << "Framebuffer complete!" << std::endl;
 		}
 	}
-
+	//NORMAL SHADOWS
 	glGenFramebuffers(1, &depthMapFbuffer);
 
 	glGenTextures(1, &depthMap);
@@ -159,36 +166,37 @@ void Application::init(){
 	//POINT LIGHT SHADOWS
 	for (int x=0; x< 5; x++)
 	{
-	glGenFramebuffers(1, &cubeMapFrameBuffer[x]);
+		glGenFramebuffers(1, &cubeMapFrameBuffer[x]);
 
-	glGenTextures(1, &depthCubeMap[x]);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap[x]);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		glGenTextures(1, &depthCubeMap[x]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap[x]);
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		for(GLuint i = 0; i<6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_DEPTH_COMPONENT, 1024,1024,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
-	
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_DEPTH_COMPONENT32F, 1024,1024,0,GL_DEPTH_COMPONENT,GL_FLOAT,NULL);
+
+
 		}
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, cubeMapFrameBuffer[x]);
-	glFramebufferTexture(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,depthCubeMap[x],0);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
-        std::cout << "Framebuffer not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, cubeMapFrameBuffer[x]);
+		glFramebufferTexture(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,depthCubeMap[x],0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE){
+			std::cout << "Point Light Shadowws Framebuffer not complete!" << std::endl;
+		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glDisable(GL_TEXTURE_CUBE_MAP);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDisable(GL_TEXTURE_CUBE_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	}
-	
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
 	quadVAO = 0;
 	//glGenVertexArrays(1, &quad_VertexArrayID);
@@ -226,16 +234,16 @@ void Application::init(){
 	//POINT LIGHTS
 	lightHandler->newPointLight(glm::vec4(-0.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
 	lightHandler->newPointLight(glm::vec4(0.6f,0.3f,0.05f,1.0f),RADIUS7,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(12.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(8.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
-	lightHandler->newPointLight(glm::vec4(-4.6f,0.3f,0.05f,1.0f),RADIUS50,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));
+	lightHandler->newPointLight(glm::vec4(-0.8,-0.4f,0.05f,1.0f),RADIUS20,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));	//RETURN TO RADIUS 50
+	lightHandler->newPointLight(glm::vec4(0.8f,-0.4f,0.05f,1.0f),RADIUS20,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));	//RETURN TO RADIUS 50
+	lightHandler->newPointLight(glm::vec4(-0.8f,0.4f,0.05f,1.0f),RADIUS20,glm::vec4(1.0f,1.0f,1.0f,1.0f),glm::vec4(0.1f,0.1f,0.2f,1.0f));	//RETURN TO RADIUS 50
 	lightHandler->initPointLights();
 	lightHandler->bindUniformBlockPointLights(plane->getProgram());
 	lightHandler->bindUniformBlockPointLights(car->getProgram());
 	lightHandler->bindUniformBlockPointLights(house->getProgram());
 	lightHandler->bindUniformBlockPointLights(shelter->getProgram());
 	lightHandler->bindDataPointLights();
-	//DIRECTIONAL LIGHTvec3(-2.0f, 4.0f, -1.0f)
+	//DIRECTIONAL LIGHT vec3(-2.0f, 4.0f, -1.0f)
 	lightHandler->newDirectionalLight(glm::vec4(-2.0f, 4.0f, -1.0f,1.0f), glm::vec4(0.3f,0.3f,0.3f,1.0f), glm::vec4(0.1f,0.1f,0.1f,1.0f));
 	lightHandler->initDirectionLights();
 	lightHandler->bindUniformBlockDirectionalLights(plane->getProgram());
@@ -252,49 +260,55 @@ bool Application::run(){
 }
 void Application::draw(){
 	glEnable(GL_DEPTH_TEST);
+	if(!shadowRendered)
+	{
+		//NORMAL SHADOWS.
+		glViewport(0, 0, 1024, 1024);
+		glBindFramebuffer(GL_FRAMEBUFFER,depthMapFbuffer);
 
-	//NORMAL SHADOWS.
-	glViewport(0, 0, 1024, 1024);
-	glBindFramebuffer(GL_FRAMEBUFFER,depthMapFbuffer);
+
+		glClear(GL_DEPTH_BUFFER_BIT);
+		car		->drawDepth(lightHandler->getLightSpaceMatrix());
+		house	->drawDepth(lightHandler->getLightSpaceMatrix());
+		shelter	->drawDepth(lightHandler->getLightSpaceMatrix());
+		skyDome	->drawDepth(lightHandler->getLightSpaceMatrix());
+		plane	->drawDepth(lightHandler->getLightSpaceMatrix());
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//!NORMAL SHADOWS
+		car			->setDepthMap(depthMap);
+		house		->setDepthMap(depthMap);
+		skyDome		->setDepthMap(depthMap);
+		plane		->setDepthMap(depthMap);
+		shelter		->setDepthMap(depthMap);
+		shadowRendered = true;
+	}
+
+	//PL SHADOWS.
+	for(int i = 0; i<5; i++){
+		glViewport(0, 0, 1024, 1024);
+		glBindFramebuffer(GL_FRAMEBUFFER,cubeMapFrameBuffer[i]);
 
 
-	glClear(GL_DEPTH_BUFFER_BIT);
-	car		->drawDepth(lightHandler->getLightSpaceMatrix(), false);
-	house	->drawDepth(lightHandler->getLightSpaceMatrix(), false);
-	shelter	->drawDepth(lightHandler->getLightSpaceMatrix(), false);
-	//skyDome	->drawDepth(lightHandler->getLightSpaceMatrix(), false);
-	plane	->drawDepth(lightHandler->getLightSpaceMatrix(), false);
-	
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	//!NORMAL SHADOWS
+		glClear(GL_DEPTH_BUFFER_BIT);
+		car		->drawDepth(lightHandler->getLightSpaceMatrix(), i);
+		house	->drawDepth(lightHandler->getLightSpaceMatrix(), i);
+		skyDome	->drawDepth(lightHandler->getLightSpaceMatrix(), i);
+		plane	->drawDepth(lightHandler->getLightSpaceMatrix(), i);
+		shelter	->drawDepth(lightHandler->getLightSpaceMatrix(), i);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		car			->setCubeDepthMap(depthCubeMap[i],i);
+		house		->setCubeDepthMap(depthCubeMap[i],i);
+		skyDome		->setCubeDepthMap(depthCubeMap[i],i);
+		plane		->setCubeDepthMap(depthCubeMap[i],i);
+		shelter		->setCubeDepthMap(depthCubeMap[i],i);
+		//!PL SHADOWS
+	}
 
-	////PL SHADOWS.
-	//glViewport(0, 0, 1024, 1024);
-	//glBindFramebuffer(GL_FRAMEBUFFER,cubeMapFrameBuffer[0]);
-	
-	
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//car		->drawDepth(lightHandler->getLightSpaceMatrix(), true);
-	//house	->drawDepth(lightHandler->getLightSpaceMatrix(), true);
-	//skyDome	->drawDepth(lightHandler->getLightSpaceMatrix(), true);
-	//plane	->drawDepth(lightHandler->getLightSpaceMatrix(), true);
-	//shelter	->drawDepth(lightHandler->getLightSpaceMatrix(), true);
-	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	//!PL SHADOWS
-	
-	car			->setDepthMap(depthMap);
-	house		->setDepthMap(depthMap);
-	//skyDome		->setDepthMap(depthMap);
-	plane		->setDepthMap(depthMap);
-	shelter		->setDepthMap(depthMap);
 
-	
-	//car			->setCubeDepthMap(depthCubeMap[0]);
-	//house		->setCubeDepthMap(depthCubeMap[0]);
-	//skyDome		->setCubeDepthMap(depthCubeMap[0]);
-	//plane		->setCubeDepthMap(depthCubeMap[0]);
-	//shelter		->setCubeDepthMap(depthCubeMap[0]);
+
+
 	//NORMAL SCENE
 	glBindFramebuffer(GL_FRAMEBUFFER, HDRFBuffer);
 	//glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -307,8 +321,12 @@ void Application::draw(){
 	skyDome		->draw(camera->getViewMatrix(), camera->getProjectionMatrix(),lightHandler->getLightSpaceMatrix(),camera->getCameraPosition());
 	plane		->draw(camera->getViewMatrix(), camera->getProjectionMatrix(),lightHandler->getLightSpaceMatrix(),camera->getCameraPosition());
 	shelter		->draw(camera->getViewMatrix(), camera->getProjectionMatrix(),lightHandler->getLightSpaceMatrix(),camera->getCameraPosition());
-	lightning	->Draw(camera->getViewMatrix(), camera->getProjectionMatrix());
-	//rain		->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+	if (rainAndLightningOn){
+		if(finishedForking){
+			lightning->Draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+		}
+		rain->draw(camera->getViewMatrix(), camera->getProjectionMatrix());
+	}
 	//unbind here
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	//glDisable(GL_DEPTH_TEST);
@@ -337,7 +355,7 @@ void Application::draw(){
 		{
 			glBindTexture(GL_TEXTURE_2D,PingPongRendTextures[!horizontal]);
 		}
-		RenderQuad();
+		RenderQuad(ShaderBlurFB->getProgram());
 		horizontal = !horizontal;
 
 		if (first_iteration)
@@ -373,7 +391,7 @@ void Application::draw(){
 
 	glUniform1i(glGetUniformLocation(ShaderBloomFinal->getProgram(), "bloom"), bloom);
 	glUniform1f(glGetUniformLocation(ShaderBloomFinal->getProgram(), "exposure"), exposure);
-	RenderQuad();
+	RenderQuad(ShaderBloomFinal->getProgram());
 	////draw here
 	//glUseProgram(quad_programID);
 	//glBindVertexArray(quad_VertexArrayID);
@@ -396,6 +414,7 @@ void Application::draw(){
 }
 void Application::update()
 {
+
 	current = SDL_GetTicks();
 	delta_Time = (float) (current - lastTime) / 1000.0f;
 	lastTime = current;
@@ -418,6 +437,7 @@ void Application::update()
 	skyDome->rotateY(0.04f,delta_Time);
 	rain->update(delta_Time,camera);
 	camera->update(delta_Time);
+	storm(delta_Time);
 	lightning->get3MajorPoints(lightningLightA,lightningLightB,lightningLightC);
 	lightHandler->changeSpecificLightPosition(2,lightningLightA);
 	lightHandler->changeSpecificLightPosition(3,lightningLightB);
@@ -437,19 +457,22 @@ void Application::update()
 		lightning->LightningInput(delta_Time,incomingEvent);
 		if(incomingEvent.type ==SDL_KEYDOWN)
 		{
-			if(incomingEvent.key.keysym.sym == SDLK_b){
+			if(incomingEvent.key.keysym.sym == SDLK_b)
+			{
 				bloom = !bloom;
 			}
-
-			if(incomingEvent.key.keysym.sym == SDLK_r){
+			if (incomingEvent.key.keysym.sym == SDLK_t)
+			{
 				exposure += 0.1f;
 			}
-
-
-			if(incomingEvent.key.keysym.sym == SDLK_e){
+			if(incomingEvent.key.keysym.sym == SDLK_r)
+			{
 				exposure -= 0.1f;
 			}
-
+			if (incomingEvent.key.keysym.sym == SDLK_k)
+			{
+				rainAndLightningOn = !rainAndLightningOn;
+			}
 		}
 	}
 
@@ -465,8 +488,9 @@ int Application::getHeight(){
 	return winHeight;
 }
 
-void Application::RenderQuad()
+void Application::RenderQuad(GLint program)
 {
+	glUseProgram(program);
 	if(quadVAO == 0){
 		GLfloat quadVertices[] = {
 			// Positions        // Texture Coords
@@ -489,5 +513,76 @@ void Application::RenderQuad()
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
-
+	glUseProgram(0);
 }
+
+void Application::RenderSmallQuad(GLint program)
+{
+	glUseProgram(program);
+	if(quadSmallVAO == 0){
+		GLfloat quadVertices[] = {
+			// Positions        // Texture Coords
+			-0.3f, 0.3f, 0.0f, 0.0f, 1.0f,
+			-0.3f, -0.3f, 0.0f, 0.0f, 0.0f,
+			0.3f, 0.3f, 0.0f, 1.0f, 1.0f,
+			0.3f, -0.3f, 0.0f, 1.0f, 0.0f,
+		};
+		// Setup plane VAO
+		glGenVertexArrays(1, &quadSmallVAO);
+		glGenBuffers(1, &quadSmallVBO);
+		glBindVertexArray(quadSmallVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadSmallVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	}
+	glBindVertexArray(quadSmallVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
+
+
+void Application::storm(float deltaTime)
+{
+	timerStorm-= 10.0f *deltaTime;
+
+	if(timerStorm <= 0.0f)
+	{
+		//if(!flashed && lightning->getBranchesToDraw() == 0 && lightning->getCoreToDraw() == 0 ){
+		if(!flashed ){
+			lightning->Init();
+			finishedForking = true;
+			flashed = true;
+		}
+		timerFlash-= 100.0f *deltaTime;
+		if(timerFlash <= 0.0f  && flashed == true ){
+			if(flashCount >= 0)
+			{
+				lightHandler->toggleActive(2);
+				lightHandler->toggleActive(3);
+				lightHandler->toggleActive(4);
+				flashCount -= 1.0f;
+				timerFlash = rand() % 5 + 5;
+
+			}
+			if(flashCount == 0 ){
+				flashCount = 5;
+				timerFlash = rand() % 5 + 5;
+				timerStorm = rand() % 20 + 2;
+				flashed = false;
+				finishedForking = false;
+				lightHandler->toggleActive(2);
+				lightHandler->toggleActive(3);
+				lightHandler->toggleActive(4);
+				
+			}
+			
+			
+		}
+	}
+	
+};

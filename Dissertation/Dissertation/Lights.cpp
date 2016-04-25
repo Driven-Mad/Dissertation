@@ -6,7 +6,7 @@ Lights::Lights(void)
 	offsetPL = 0;
 	leftShiftPressed = false;
 	activeLight = -1;
-	PLShadowProjection = glm::perspective(90.0f,1.0f,1.0f,25.0f);
+	PLShadowProjection = glm::perspective(glm::radians(90.0f),1.0f,0.1f,25.0f);
 }
 
 Lights::~Lights(void)
@@ -28,34 +28,42 @@ void Lights::newPointLight(glm::vec4 position, Radius Radius, glm::vec4 lightCol
 	//Handle the differnet Radius values. 
 	switch(Radius)
 	{
-		case RADIUS7:
-			pl.PLliniear = 0.7f;
-			pl.PLquadratic = 1.8f;
-			break;
-		case RADIUS13:
-			pl.PLliniear = 0.35f;
-			pl.PLquadratic = 0.44f;
-			break;
-		case RADIUS20:
-			pl.PLliniear = 0.22f;
-			pl.PLquadratic = 0.2f;
-			break;
-		case RADIUS32:
-			pl.PLliniear = 0.14f;
-			pl.PLquadratic = 0.07f;
-			break;
-		case RADIUS50:
-			pl.PLliniear = 0.09f;
-			pl.PLquadratic = 0.032f;
-			break;
-		case RADIUS100:
-			pl.PLliniear = 0.045f;
-			pl.PLquadratic = 0.0075f;
-			break;
-		default:
-			pl.PLliniear = 0.07f;
-			pl.PLquadratic = 1.8f;
-			break;
+	case RADIUS7:
+		pl.PLliniear = 0.7f;
+		pl.PLquadratic = 1.8f;
+		break;
+	case RADIUS13:
+		pl.PLliniear = 0.35f;
+		pl.PLquadratic = 0.44f;
+		break;
+	case RADIUS20:
+		pl.PLliniear = 0.22f;
+		pl.PLquadratic = 0.2f;
+		break;
+	case RADIUS32:
+		pl.PLliniear = 0.14f;
+		pl.PLquadratic = 0.07f;
+		break;
+	case RADIUS50:
+		pl.PLliniear = 0.09f;
+		pl.PLquadratic = 0.032f;
+		break;
+	case RADIUS100:
+		pl.PLliniear = 0.045f;
+		pl.PLquadratic = 0.0075f;
+		break;
+	case RADIUS600:
+		pl.PLliniear = 0.007f;
+		pl.PLquadratic = 0.0002f;
+		break;
+	case RADIUS3250:
+		pl.PLliniear = 0.0014f;
+		pl.PLquadratic = 0.000007f;
+		break;
+	default:
+		pl.PLliniear = 0.07f;
+		pl.PLquadratic = 1.8f;
+		break;
 	}
 	pl.ShadowTransforms[0] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(1.0f,0.0f,0.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
 	pl.ShadowTransforms[1] = (PLShadowProjection * glm::lookAt(glm::vec3(position),glm::vec3(position) + glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
@@ -79,7 +87,7 @@ void Lights::draw(glm::mat4 viewMat, glm::mat4 projMat)
 		if(pointLights[i].PLactive)
 		{
 			//If the light is active, draw the model to represent it. 
-			PointLightsModels[i]->draw(viewMat, projMat, glm::mat4(0.0f),glm::vec3(0.0f));
+			//PointLightsModels[i]->draw(viewMat, projMat, glm::mat4(0.0f),glm::vec3(0.0f));
 		}
 	}
 }
@@ -112,37 +120,40 @@ void Lights::update(float dt)
 
 	//Set the offset to be where the offset of the bools start. 
 	offsetPL= booloffsetsPL;
+	glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
 		//send if the lights are active or not to the shaders.
-		glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
+		
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(bool) , &pointLights[x].PLactive);
 		offsetPL += sizeof(glm::vec4);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
-	glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 	offsetPL= shadowOffSetsPL;
-	for(unsigned int x = 0; x<pointLights.size(); x++)
-	{
-		pointLights[x].ShadowTransforms[0] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(1.0f,0.0f,0.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
-		pointLights[x].ShadowTransforms[1] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
-		pointLights[x].ShadowTransforms[2] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,1.0f,0.0f) ,glm::vec3(0.0f, 0.0f, 1.0f)));
-		pointLights[x].ShadowTransforms[3] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 0.0f,-1.0f)));
-		pointLights[x].ShadowTransforms[4] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,1.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
-		pointLights[x].ShadowTransforms[5] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[0]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[1]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[2]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[3]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[4]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[5]);
-		offsetPL += (sizeof(glm::vec4)*4);
-		
+	for(unsigned int i =0; i<6; i++){
+		for(unsigned int x = 0; x<pointLights.size(); x++)
+		{
+			pointLights[x].ShadowTransforms[0] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(1.0f,0.0f,0.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+			pointLights[x].ShadowTransforms[1] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(-1.0f,0.0f,0.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
+			pointLights[x].ShadowTransforms[2] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,1.0f,0.0f) ,glm::vec3(0.0f, 0.0f, 1.0f)));
+			pointLights[x].ShadowTransforms[3] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 0.0f,-1.0f)));
+			pointLights[x].ShadowTransforms[4] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,1.0f) ,glm::vec3(0.0f,-1.0f, 0.0f)));
+			pointLights[x].ShadowTransforms[5] = (PLShadowProjection * glm::lookAt(glm::vec3(pointLights[x].PLposition),glm::vec3(pointLights[x].PLposition) + glm::vec3(0.0f,0.0f,-1.0f),glm::vec3(0.0f,-1.0f, 0.0f)));
+
+			glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4 , &pointLights[x].ShadowTransforms[i]);
+			offsetPL += (sizeof(glm::vec4)*4);
+
+			//glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[1]);
+			//offsetPL += (sizeof(glm::vec4)*4);
+			//glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[2]);
+			//offsetPL += (sizeof(glm::vec4)*4); 
+			//glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[3]);
+			//offsetPL += (sizeof(glm::vec4)*4);
+			//glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[4]);
+			//offsetPL += (sizeof(glm::vec4)*4);
+			//glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[5]);
+			//offsetPL += (sizeof(glm::vec4)*4);
+
+		}
 	}
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	//for(unsigned int x = 0; x<pointLights.size(); x++)
@@ -159,6 +170,10 @@ void Lights::toggleActive()
 {
 	//Toggles if the active light is on or off. 
 	pointLights[activeLight].PLactive = !pointLights[activeLight].PLactive;
+}
+
+void Lights::toggleActive(int Light){
+	pointLights[Light].PLactive = !pointLights[Light].PLactive;
 }
 
 void Lights::initPointLights(){
@@ -184,10 +199,10 @@ void Lights::bindDataPointLights(){
 	glBindBuffer(GL_UNIFORM_BUFFER, uniformBlockPLs);
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
-		
+
 		glBufferSubData(GL_UNIFORM_BUFFER, offsetPL,sizeof(glm::vec4) , glm::value_ptr(pointLights[x].PLposition));
 		offsetPL += sizeof(glm::vec4);
-		
+
 	}
 	//AMBIENTS
 	for(unsigned int x = 0; x<pointLights.size(); x++)
@@ -227,7 +242,7 @@ void Lights::bindDataPointLights(){
 		offsetPL += sizeof(glm::vec4);
 	}
 
-	
+
 	shadowOffSetsPL = offsetPL;
 	for(unsigned int x = 0; x<pointLights.size(); x++)
 	{
@@ -243,7 +258,7 @@ void Lights::bindDataPointLights(){
 		offsetPL += (sizeof(glm::vec4)*4);
 		glBufferSubData(GL_UNIFORM_BUFFER,offsetPL,sizeof(glm::vec4)*4, &pointLights[x].ShadowTransforms[5]);
 		offsetPL += (sizeof(glm::vec4)*4);
-		
+
 	}
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
@@ -263,88 +278,89 @@ void Lights::lightInput(SDL_Event incomingEvent, float delta_Time)
 	case SDL_KEYDOWN:
 		switch( incomingEvent.key.keysym.sym )
 		{
-		
-			case SDLK_q:
-				if(pointLights[activeLight].PLactive)
+
+		case SDLK_q:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.z += 10.0f* delta_Time;
-					}
+					activeLightModelPos.z += 10.0f* delta_Time;
 				}
-				break;
-			case SDLK_e:
-				if(pointLights[activeLight].PLactive)
+			}
+			break;
+		case SDLK_e:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.z -=10.0f* delta_Time;
-					}
+					activeLightModelPos.z -=10.0f* delta_Time;
 				}
-				break;
-			case SDLK_w:
-				if(pointLights[activeLight].PLactive)
+			}
+			break;
+		case SDLK_w:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.y += 10.0f* delta_Time;
-					}
+					activeLightModelPos.y += 10.0f* delta_Time;
 				}
-				break;
-			case SDLK_a:
-				if(pointLights[activeLight].PLactive)
+			}
+			break;
+		case SDLK_a:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.x -= 10.0f* delta_Time;
-					}
+					activeLightModelPos.x -= 10.0f* delta_Time;
 				}
-				break;
-			case SDLK_s:
-				if(pointLights[activeLight].PLactive)
+			}
+			break;
+		case SDLK_s:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.y -= 10.0f* delta_Time;
-					}
+					activeLightModelPos.y -= 10.0f* delta_Time;
 				}
-				break;
-			case SDLK_d:
-				if(pointLights[activeLight].PLactive)
+			}
+			break;
+		case SDLK_d:
+			if(pointLights[activeLight].PLactive)
+			{
+				if(leftShiftPressed)
 				{
-					if(leftShiftPressed)
-					{
-						activeLightModelPos.x += 10.0f* delta_Time;
-					}
+					activeLightModelPos.x += 10.0f* delta_Time;
 				}
-				break;
-			
-			case SDLK_LSHIFT:
-				leftShiftPressed = true;
-				break;
-			case SDLK_TAB:
-				activeLight ++;
-				if( activeLight >= pointLights.size() )
-				{
-					activeLight = 0;
-				}
-				activeLightModelPos = glm::vec3(pointLights[activeLight].PLposition.x, pointLights[activeLight].PLposition.y, pointLights[activeLight].PLposition.z);
-				break;
-			case SDLK_c:
-				toggleActive();
-				break;
+			}
+			break;
+
+		case SDLK_LSHIFT:
+			leftShiftPressed = true;
+			break;
+		case SDLK_TAB:
+			activeLight ++;
+			if( activeLight >= pointLights.size() )
+			{
+				activeLight = 0;
+			}
+			activeLightModelPos = glm::vec3(pointLights[activeLight].PLposition.x, pointLights[activeLight].PLposition.y, pointLights[activeLight].PLposition.z);
+			printf("\n The Current Active light is: %i ", activeLight);
+			break;
+		case SDLK_c:
+			toggleActive();
+			break;
 		}
 		break;
 	case SDL_KEYUP:
 		switch(incomingEvent.key.keysym.sym)
 		{
-			case SDLK_LSHIFT:
-				leftShiftPressed = false;
-				break;
+		case SDLK_LSHIFT:
+			leftShiftPressed = false;
+			break;
 		}
 		break;
 	}
-		
+
 }
 
 ///////////////////////////////////////////
@@ -356,7 +372,7 @@ void Lights::newDirectionalLight(glm::vec4 direction, glm::vec4 lightColour, glm
 	directionalLight.direction = direction;
 	directionalLight.lightColour = lightColour;
 	directionalLight.ambient = ambientColour;
-	DLlightProjection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,-10.0f,17.5f);
+	DLlightProjection = glm::ortho(-5.0f,5.0f,5.0f,-5.0f,-6.0f,6.0f);
 	DLlightView = glm::lookAt(glm::vec3(direction),glm::vec3(0.0f),glm::vec3(0.0f,1.0f,0.0f));
 	DLlightSpaceMatrix = DLlightProjection * DLlightView;
 }

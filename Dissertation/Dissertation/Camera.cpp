@@ -30,7 +30,7 @@ void Camera::update(float DT){
 	if(field_of_view <=1.0f){
 		field_of_view = 1.0f;
 	}
-	if(field_of_view >=45.0f){
+	if(field_of_view >45.0f){
 		field_of_view = 45.0f;
 	}
 	if(moveF){

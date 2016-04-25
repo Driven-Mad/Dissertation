@@ -44,8 +44,10 @@ public:
 	/// \brief returns screen height of application
 	int getHeight();
 
+	void RenderSmallQuad(GLint program);
+	void RenderQuad(GLint program);
 
-	void RenderQuad();
+	void storm(float deltaTime);
 private:
 	SDL_Window *window; ///< Window for SDL
 	SDL_Renderer *renderer; ///< Renderer for SDL
@@ -77,8 +79,13 @@ private:
 	GLuint quad_vertexbuffer; ///< quad vertex buffer
 	GLuint quad_programID; ///< quad program ID
 	GLint quad_attrib;///< quad Attribute
-	GLuint quadVAO;
-	GLuint quadVBO;
+	GLuint quadVAO, quadSmallVAO;
+	GLuint quadVBO,quadSmallVBO;
 	GLfloat exposure;
+	bool shadowRendered;
+	float timerStorm, timerFlash;
+	bool rainAndLightningOn;
+	int flashCount;
+	bool flashed,finishedForking;
 };
 #endif; //!APPLICATION_H

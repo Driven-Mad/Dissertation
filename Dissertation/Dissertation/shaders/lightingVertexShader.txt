@@ -55,7 +55,7 @@ out vec2 UV;
 out vec4 vPositionV;
 
 out vec4 FragPositionLightSpace;
-
+out vec3 normalShadows;
 vec3 calculateLightDirectionForPointLights(vec4 LightPosition, vec4 eyeSpaceVertPosition,mat3 TBN);
 vec3 calculateLightDirectionForDirectionalLight(vec4 lightDirection, vec4 eyeSpaceVertPosition,mat3 TBN);
 
@@ -66,8 +66,8 @@ vec3 vertexTangent_cameraspace = MV3x3 * normalize(vTangentIn);
 vec3 vertexBitangent_cameraspace = MV3x3 * normalize(vBiTangentIn);
 
 mat3 TBN = transpose(mat3(vertexTangent_cameraspace,vertexBitangent_cameraspace,vertexNormal_cameraspace)); //Get the Tangent/Bitangent/Normal Matrix
-vNormalV = MV3x3 * vNormalIn;
-
+vNormalV = vNormalIn;
+normalShadows = transpose(inverse(mat3(modelMat))) * vNormalIn;
 gl_Position = projMat * viewMat * modelMat * vPosition;
 vec4 eyeSpaceVertPos = viewMat * modelMat * vPosition; 
 
@@ -85,9 +85,7 @@ for(int i = 0; i<no_of_lights; i++)
 halfVecPL[i] = normalize( normalize(eyeDir) + normalize(lightDirPLV[i]));
 
 halfVecDL = normalize( normalize(eyeDir) + normalize(lightDirDLV));
-
-FragPositionLightSpace = lightSpaceMatrix * vec4(modelMat * vPosition);
-
+FragPositionLightSpace = lightSpaceMatrix * vPosition;
 vPositionV = vPosition;
 UV = vUVIn ;
 }

@@ -21,7 +21,7 @@ uniform int lightID;
 
 void main()
 {
-	float lightDist = length(fragPos.xyz - PLposition[0].xyz);
+	float lightDist = length(fragPos.xyz - PLposition[lightID].xyz);
 	
 	lightDist = lightDist/25.0f;
 	gl_FragDepth = lightDist;

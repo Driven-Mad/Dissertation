@@ -9,7 +9,7 @@
 #include "Model.h"
 enum Radius
 {
-RADIUS7,RADIUS13,RADIUS20,RADIUS32,RADIUS50,RADIUS100
+RADIUS7,RADIUS13,RADIUS20,RADIUS32,RADIUS50,RADIUS100,RADIUS600, RADIUS3250
 };
 
 class Lights
@@ -80,7 +80,7 @@ public:
 
 	///\brief Toggle the which is the currently active light. 
 	void toggleActive();
-
+	void toggleActive(int Light);
 	///\brief handle the lightInput such as the toggle active, and movement
 	void lightInput(SDL_Event incomingEvent, float delta_Time);
 	///\brief draw the visual appearance of the lights

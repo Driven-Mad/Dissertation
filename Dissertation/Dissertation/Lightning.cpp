@@ -13,10 +13,14 @@ Lightning::Lightning(void)
 	program = 0;
 	predessingIndex = 0;
 	strikeBranchPercentage = 30;
+	branchedStart = -1;
 	shaderModelMatLocation = shaderViewMatLocation = shaderProjMatLocation = 0;
 	hitGround = false;
+	drawBranch = false;
 	finishedBranches = false;
 	Strike();
+	coreToDraw = m_vCoreVerts.size();
+	branchesToDraw = m_vBranchedVerts.size();
 	// Create the model
 	initaliseVAO();
 	// Create the shaders
@@ -34,6 +38,7 @@ void Lightning::Init()
 	m_vCoreVerts.clear();
 	m_vBranchedVerts.clear();
 	lightningStrike.clear();
+	branchedStart = -1;
 	predessingIndex = 0;
 	//* Random point between 16, 22, 16 && -16, 22, -16
 	startingPoint = glm::vec3(util::randF(-26.0f,26.0f),30.0f,util::randF(-26.0f,26.0f));
@@ -41,15 +46,26 @@ void Lightning::Init()
 	//is this the first branch of lightning
 	firstBranch = true;
 	strikeBranchPercentage = 30;
+	drawBranch = false;
 	hitGround = false;
 	finishedBranches = false;
 	Strike();
+	coreToDraw = m_vCoreVerts.size();
+	branchesToDraw = m_vBranchedVerts.size();
 	//resend the data for positions. 
+	//for (int i = m_vCoreVerts.size(); i >= 0; i--){
+	//	for (int x = 0; x < 60; x++){
+	//		if (x != 59){
+	//			continue;
+	//		};
 	glBindBuffer(GL_ARRAY_BUFFER, corePositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, m_vCoreVerts.size() * sizeof(glm::vec3), &m_vCoreVerts[0] ,GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0 );
+	glBufferData(GL_ARRAY_BUFFER, (m_vCoreVerts.size()) * sizeof(glm::vec3), &m_vCoreVerts[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
 	glEnableVertexAttribArray(0);
-	glBindVertexArray( 0 );
+	glBindVertexArray(0);
+			
+	//	}
+	//}
 
 	glBindBuffer(GL_ARRAY_BUFFER, branchPositionBuffer);
 	glBufferData(GL_ARRAY_BUFFER, m_vBranchedVerts.size() * sizeof(glm::vec3), &m_vBranchedVerts[0] ,GL_DYNAMIC_DRAW);
@@ -60,6 +76,29 @@ void Lightning::Init()
 
 void Lightning::Draw(glm::mat4 viewMatrix, glm::mat4 projMatrix)
 {
+	if (coreToDraw > 0)
+	{
+		if (coreToDraw < branchedStart)
+		{
+			drawBranch = true;
+		}
+		coreToDraw -= 4;
+		if (coreToDraw < 0)
+		{
+			coreToDraw = 0;
+		}
+	}
+	if (drawBranch)
+	{
+		if (branchesToDraw > 0)
+		{
+			branchesToDraw -= 4;
+			if (branchesToDraw < 0)
+			{
+				branchesToDraw = 0;
+			}
+		}
+	}
 	DrawCore(viewMatrix,projMatrix);
 	DrawBranch(viewMatrix,projMatrix);
 }
@@ -80,12 +119,12 @@ void Lightning::DrawCore(glm::mat4 viewMatrix, glm::mat4 projMatrix)
 			glUniformMatrix4fv(shaderModelMatLocation, 1, GL_FALSE, glm::value_ptr(modelMatrix) );
 			glUniformMatrix4fv(shaderViewMatLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix) );
 			glUniformMatrix4fv(shaderProjMatLocation, 1, GL_FALSE, glm::value_ptr(projMatrix) );
-
+			glEnable(GL_LINE_SMOOTH);
 			// Tell OpenGL to draw it
 			// Must specify the type of geometry to draw and the number of vertices
 			//specifying the line width
-			glLineWidth(5.0f);
-			glDrawArrays(GL_LINES, 0,numCoreVerts);
+			glLineWidth(6.0f);
+			glDrawArrays(GL_LINES, 0, numCoreVerts - coreToDraw);
 		// Unbind VAO
 		glBindVertexArray( 0 );
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
@@ -111,7 +150,7 @@ void Lightning::DrawBranch(glm::mat4 viewMatrix, glm::mat4 projMatrix)
 			// Tell OpenGL to draw it
 			// Must specify the type of geometry to draw and the number of vertices
 			glLineWidth(2.0f);
-			glDrawArrays(GL_LINES, 0,numBranchVerts); 
+			glDrawArrays(GL_LINES, 0, numBranchVerts - branchesToDraw);
 		// Unbind VAO
 		glBindVertexArray( 0 );
 	// Technically we can do this, but it makes no real sense because we must always have a valid shader program to draw geometry
@@ -120,12 +159,13 @@ void Lightning::DrawBranch(glm::mat4 viewMatrix, glm::mat4 projMatrix)
 void Lightning::initaliseVAO()
 {
 	//Initalise all the VAOS
+	
 	glGenVertexArrays( 1, &VAOcore );
 	glBindVertexArray(VAOcore);
 		corePositionBuffer = 0;
 		glGenBuffers(1, &corePositionBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, corePositionBuffer);
-		glBufferData(GL_ARRAY_BUFFER, m_vCoreVerts.size() * sizeof(glm::vec3), &m_vCoreVerts[0] ,GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (m_vCoreVerts.size()) * sizeof(glm::vec3), &m_vCoreVerts[0] ,GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0 );
 		glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -136,7 +176,7 @@ void Lightning::initaliseVAO()
 		branchPositionBuffer = 0;
 		glGenBuffers(1, &branchPositionBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, branchPositionBuffer);
-		glBufferData(GL_ARRAY_BUFFER, m_vBranchedVerts.size() * sizeof(glm::vec3), &m_vBranchedVerts[0] ,GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, (m_vBranchedVerts.size()) * sizeof(glm::vec3), &m_vBranchedVerts[0] ,GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0 );
 		glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -188,6 +228,14 @@ void Lightning::Strike()
 	//for(int i = 0; i<m_vCoreVerts.size();i++){
 	//	printf("\n CORE BRANCH %i = X:%f, Y:%f, Z%f", i, m_vCoreVerts[i].x, m_vCoreVerts[i].y, m_vCoreVerts[i].z);
 	//}
+	for (int i = 0; i < m_vCoreVerts.size(); i+=2)
+	{
+		if (m_vCoreVerts[i] == m_vBranchedVerts[0])
+		{
+			branchedStart = m_vCoreVerts.size() - i;
+			break;
+		}
+	}
 
 }
 
@@ -354,9 +402,9 @@ void Lightning::LightningInput(float DT,SDL_Event &incomingEvent)
 void  Lightning::get3MajorPoints(glm::vec4 &pointA, glm::vec4& pointB, glm::vec4 &pointC)
 {
 	//returns 3 major points in the array
-	int mid = m_vCoreVerts.size()/2;
-	int midBegin = mid - 30;
-	int midend = mid + 30;
+	int mid = m_vCoreVerts.size()-1;
+	int midBegin = mid -10;
+	int midend = mid - 20;
 	pointA = glm::vec4(m_vCoreVerts[midBegin].x,m_vCoreVerts[midBegin].y,m_vCoreVerts[midBegin].z,1.0f);
 	pointB =  glm::vec4(m_vCoreVerts[mid].x,m_vCoreVerts[mid].y,m_vCoreVerts[mid].z,1.0f);
 	pointC =  glm::vec4(m_vCoreVerts[midend].x,m_vCoreVerts[midend].y,m_vCoreVerts[midend].z,1.0f);

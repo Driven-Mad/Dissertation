@@ -28,8 +28,8 @@ layout (location = 1) out vec4 brightness;
 void main(){
 
 
-		
-	colour = vec4(0.85f,0.865f,0.88f, 1.0f);
+	colour = vec4(1.0f,1.0f,1.0f, 1.0f);	
+	//colour = vec4(0.85f,0.865f,0.88f, 1.0f);
 	float tempBreach = dot(colour.xyz, vec3(0.2126,0.7152,0.0722));
 	if(tempBreach > 1.0){
 		brightness = vec4(colour.xyz,1.0);
